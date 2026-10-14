@@ -1,0 +1,12 @@
+:root { color-scheme: light; font-synthesis: none; text-rendering: optimizeLegibility; }
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: #f6f3ea; }
+#app { min-height: 100svh; }
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+button:disabled { cursor: default; }
+button, a, select { touch-action: manipulation; }
+a { color: inherit; }
+svg { vertical-align: middle; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
