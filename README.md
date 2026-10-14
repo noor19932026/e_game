@@ -2,7 +2,7 @@
 
 独立的网页版英语合并小游戏。8 个生活主题、35 个物品词、27 条动作关联和16 个常用搭配，按完整词条去重后共 74 个学习目标。
 
-公网试玩：[https://polanking.com/word-merge/](https://polanking.com/word-merge/)。2026-10-14 已发布并完成公网浏览器验收，游戏代码版本为 `52bafda6`。
+公网试玩：[https://polanking.com/e-game/word-merge/](https://polanking.com/e-game/word-merge/)。2026-10-14 已发布并完成公网浏览器验收，游戏代码版本为 `52bafda6`。
 
 本项目从 E_Partner 的试玩页独立出来，运行时不依赖 E_Partner，不包含登录、后台 API、数据库、OSS 图片或远程字体。图片均为内置 SVG，英语朗读使用设备的浏览器／系统语音。
 
@@ -38,14 +38,14 @@ pnpm preview
 
 ## 部署方案一：现有 E_Partner 服务器
 
-使用独立目录 `/var/www/word-merge/`，保留原站点 `/var/www/e_partner/`。无需部署或启动任何 Python、Node 后台，不涉及数据库。
+使用独立目录 `/var/www/e-game/word-merge/`，保留原站点 `/var/www/e_partner/`。无需部署或启动任何 Python、Node 后台，不涉及数据库。
 
 1. 在开发机或构建器执行 `pnpm install --frozen-lockfile && pnpm test && pnpm build`。
-2. 将 **dist 内的全部文件** 上传到独立目录 `/var/www/word-merge/`。不要只上传 index.html，也不要上传整个源码仓库到站点目录。
+2. 将 **dist 内的全部文件** 上传到独立目录 `/var/www/e-game/word-merge/`。不要只上传 index.html，也不要上传整个源码仓库到站点目录。
 3. 备份当前站点 Nginx 配置，在对应域名的 `server { ... }` 内引用 `deploy/nginx-existing-site.inc` 的 location 配置。若 HTTP 自动跳 HTTPS，需要加入实际提供 HTTPS 的 server 块。
-4. 用 `nginx -t` 验证配置。验证成功后仅 reload Nginx，然后通过现有域名的 `/word-merge/` 打开。
+4. 用 `nginx -t` 验证配置。验证成功后仅 reload Nginx，然后通过现有域名的 `/e-game/word-merge/` 打开。
 
-Nginx 片段匹配独立目录，不覆盖原站点的 `/api` 和其他页面。构建的资源使用相对路径，可同时部署在域名根目录或 `/word-merge/`。
+Nginx 片段匹配独立目录，不覆盖原站点的 `/api` 和其他页面。旧 `/word-merge/` 入口及资源地址会重定向到新路径，继续兼容已分享的链接。构建的资源使用相对路径，可同时部署在域名根目录或 `/e-game/word-merge/`。
 
 平台／部署面板若支持静态站点：构建命令 `pnpm install --frozen-lockfile && pnpm build`，发布目录 `dist`，无需环境变量、数据库或业务端口。
 

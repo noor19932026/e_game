@@ -1,4 +1,4 @@
-"""Verify the built game at both / and /word-merge/, without any backend."""
+"""Verify root and nested deployment paths without any backend."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -11,8 +11,10 @@ dist = Path(__file__).resolve().parents[1] / 'dist'
 
 class StaticHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
-        if path.startswith('/word-merge/'):
-            path = path[len('/word-merge'):]
+        for prefix in ['/e-game/word-merge/', '/word-merge/']:
+            if path.startswith(prefix):
+                path = '/' + path[len(prefix):]
+                break
         return super().translate_path(path)
 
     def log_message(self, *_):
@@ -26,7 +28,7 @@ origin = f'http://127.0.0.1:{server.server_port}'
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        for prefix in ['/', '/word-merge/']:
+        for prefix in ['/', '/word-merge/', '/e-game/word-merge/']:
             context = browser.new_context(viewport={'width': 390, 'height': 844})
             page = context.new_page()
             requests, errors = [], []
