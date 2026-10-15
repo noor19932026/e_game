@@ -2,7 +2,9 @@
 
 独立的网页版英语小店游戏。主线为“帮 Mia 准备野餐”：学习 bread、apple、milk、water，完成数量订单和装包指令。保留自由合成的 8 个生活主题、35 个物品词、27 条动作关联、16 个常用搭配（自由合成词库去重共 74 个学习目标）。
 
-公网试玩（已发布旧版）：[https://polanking.com/e-game/word-merge/](https://polanking.com/e-game/word-merge/)。2026-10-14 已发布并完成公网浏览器验收，游戏代码版本为 `52bafda6`。本次野餐章节、简化界面与动物来访已在本地实现与验证，需单独发布后才会更新这个公网链接。
+公网试玩：[https://polanking.com/e-game/word-merge/](https://polanking.com/e-game/word-merge/)。2026-10-15 已发布游戏代码版本 `a3ccae6`，包含野餐章节、简化界面、动物来访和小店装扮。本地与公网完整浏览器验收、19 项规则测试、嵌套路径静态资源检查均通过；旧版实际浏览器存档升级到版本 4 后仍保留棋盘、星币、订单和练习记录。
+
+服务器发布目录为 `/var/www/e-game/word-merge/`。发布前的可读静态备份和回退目录保存在 `/var/www/e-game/backups/`，发布记录保存在 `/var/www/e-game/releases/`。本次切换保留了旧版哈希资源，兼容已打开的浏览器页面。
 
 本项目从 E_Partner 的试玩页独立出来，运行时不依赖 E_Partner，不包含登录、后台 API、数据库、OSS 图片或远程字体。图片均为内置 SVG，英语朗读使用设备的浏览器／系统语音。
 
