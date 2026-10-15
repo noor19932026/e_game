@@ -1,0 +1,69 @@
+.visitor-cafe { border:1px solid #dfd8c5; border-radius:18px; background:#fffcf4; padding:24px; color:#514331; }
+.visitor-cafe button,.visitor-cafe select { font:inherit; cursor:pointer; }
+.visitor-cafe button:disabled { cursor:default; opacity:.5; }
+.visitor-cafe button:focus-visible,.visitor-cafe select:focus-visible,.visitor-cafe summary:focus-visible { outline:3px solid #b27836; outline-offset:3px; }
+.visitor-cafe h1,.visitor-cafe h2,.visitor-cafe p { margin:0; }
+.visitor-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; padding-bottom:20px; border-bottom:1px solid #ebe4d3; }
+.visitor-eyebrow { font:9px Georgia,serif; letter-spacing:2px; color:#91816c; }
+.visitor-heading h1 { margin-top:9px; font-size:24px; font-weight:600; }
+.friendship { display:flex; align-items:center; flex-wrap:wrap; gap:6px; color:#b47d6b; font:22px Georgia,serif; }
+.friendship small { font:10px 'Microsoft YaHei',sans-serif; }
+.guest-layout { display:grid; grid-template-columns:210px minmax(0,1fr); gap:30px; align-items:center; padding:24px 0; }
+.guest-portrait { background:#edf0df; border-radius:70px 70px 15px 15px; padding:12px 16px 16px; text-align:center; }
+.animal-button { padding:0; width:100%; height:160px; border:0; background:transparent; transition:transform .2s; }
+.animal-button:hover { transform:translateY(-3px) rotate(-3deg); }
+.guest-portrait>span { display:block; font-size:13px; color:#617453; margin-top:4px; }
+.guest-portrait>small { display:block; font-size:9px; color:#9a8b74; margin-top:7px; }
+.guest-label { font-size:11px; color:#aa8668; }
+.guest-request { font:25px/1.5 Georgia,serif; color:#496653; padding:10px 0; max-width:540px; }
+.visitor-text-button { display:inline-flex; align-items:center; gap:5px; background:transparent; border:0; padding:7px 0; color:#788968; font-size:11px!important; text-decoration:underline; text-underline-offset:3px; }
+.animal-preferences { border-top:1px dashed #ded8c7; padding-top:13px; margin-top:12px; color:#827056; font-size:11px; }
+.animal-preferences summary,.guest-notebook summary { cursor:pointer; }
+.animal-preferences p { line-height:1.9; margin-top:10px; }
+.animal-preferences span { display:block; margin-top:7px; color:#6a805c; }
+.animal-preferences a { font-size:9px; display:block; color:#9d927c; margin-top:9px; }
+.visitor-primary,.visitor-secondary { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:0; border-radius:7px; padding:11px 15px; font-size:12px!important; background:#496653; color:#fff9e9; }
+.visitor-secondary { background:#f2e8ce; color:#967849; margin-top:14px; }
+.secret-finished { display:block; font-size:11px; color:#79906b; margin-top:15px; }
+.hidden-quest { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 20px; margin-bottom:20px; border:1px dashed #d7b574; border-radius:10px; background:#fcf4de; }
+.hidden-quest>div>span { color:#ac8245; font-size:10px; }
+.hidden-quest h2 { font:22px/1.6 Georgia,serif; color:#716441; }
+.drink-choices { display:flex; gap:12px; }
+.drink-choices button { width:77px; height:85px; border:1px solid #e4d4b5; background:#fffdf3; border-radius:8px; padding:5px; color:#827052; }
+.drink-choices .picnic-art { height:57px; }
+.drink-choices small { font-size:10px; }
+.pet-prep-heading { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-top:5px; }
+.pet-prep-heading h2 { font-size:15px; font-weight:600; }
+.pet-prep-heading small { display:block; font-size:9px; margin-top:6px; color:#95866d; }
+.pet-prep-heading label { display:flex; gap:7px; align-items:center; color:#8c7e67; font-size:10px; }
+.pet-prep-heading select { background:#fffaf0; border:1px solid #dfdac6; border-radius:6px; padding:8px; color:#677857; font-size:11px; }
+.pet-recipe { display:flex; align-items:center; justify-content:center; gap:16px; padding:15px 0; background:#f6f4e9; border-radius:10px; margin:16px 0; }
+.pet-recipe>div { width:145px; text-align:center; }
+.pet-recipe .pet-food-art { width:67px; height:67px; margin:auto; }
+.pet-recipe b { display:block; font:13px Georgia,serif; color:#746247; }
+.pet-recipe small { display:block; font-size:9px; color:#9a8b72; margin-top:5px; }
+.pet-recipe>svg { color:#b6ac8d; flex-shrink:0; }
+.pet-recipe .locked { opacity:.5; }
+.pet-toolbar { display:flex; justify-content:space-between; align-items:center; margin:16px 0 12px; gap:12px; }
+.pet-toolbar .visitor-primary { background:#e7eddd; color:#627851; border:1px solid #d0d9be; }
+.pet-board { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:9px; background:#ece9de; border:1px solid #e1dac7; border-radius:11px; padding:11px; }
+.pet-board>button { min-width:0; aspect-ratio:.86; position:relative; padding:6px 3px; border:2px solid transparent; border-radius:8px; background:#fffbef; color:#857356; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.pet-board small { font-size:9px; line-height:1.3; overflow-wrap:anywhere; }
+.pet-tile-level { position:absolute; left:5px; top:4px; font-size:9px; color:#a5957b; }
+.pet-board .pet-food-art { width:90%; height:70px; }
+.pet-board .selected { border-color:#6f8a59; background:#e9efdc; transform:translateY(-2px); }
+.pet-board .terminal { box-shadow:inset 0 0 0 1px #d6b77c; }
+.pet-empty { color:#d8cfba; font-size:19px; }
+.pet-delivery { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:15px; }
+.pet-delivery>span { font-size:11px; color:#96866c; }
+.visitor-message { min-height:36px; padding-top:15px; margin-top:15px!important; border-top:1px dashed #e0d7c1; font-size:11px; line-height:1.8; color:#937a56; }
+.guest-notebook { padding-top:15px; margin-top:14px; border-top:1px solid #e8e0cf; color:#8b7a60; font-size:11px; }
+.met-animals { display:flex; gap:20px; justify-content:space-around; margin:15px 0; }
+.met-animals>span { width:90px; text-align:center; }
+.met-animals .animal-art { height:75px; }
+.met-animals b { font:12px Georgia,serif; }
+.met-animals .unmet { opacity:.4; }
+.guest-notebook p { font-size:10px; line-height:1.9; }
+@media(max-width:800px) { .pet-board { grid-template-columns:repeat(4,minmax(0,1fr)); }.pet-board>button { aspect-ratio:1.2; }.pet-board .pet-food-art { height:59px; }.guest-layout { grid-template-columns:165px 1fr; gap:20px; }.animal-button { height:135px; } }
+@media(max-width:550px) { .visitor-cafe { padding:16px 14px; }.visitor-heading h1 { font-size:19px; }.visitor-eyebrow { font-size:7px; letter-spacing:1px; }.visitor-heading { gap:10px; padding-bottom:15px; }.friendship { font-size:20px; }.friendship small { width:100%; font-size:8px; text-align:right; }.guest-layout { grid-template-columns:110px minmax(0,1fr); gap:14px; padding:18px 0; align-items:start; }.guest-portrait { padding:7px 7px 12px; }.animal-button { height:100px; }.guest-portrait>span { font-size:10px; }.guest-portrait>small { font-size:8px; line-height:1.6; }.guest-label { font-size:9px; }.guest-request { font-size:19px; padding:7px 0; }.animal-preferences { font-size:10px; line-height:1.7; padding-top:8px; margin-top:6px; }.visitor-text-button { font-size:10px!important; }.visitor-secondary { font-size:10px!important; padding:9px; }.hidden-quest { padding:13px; flex-direction:column; align-items:flex-start; }.drink-choices { align-self:center; }.hidden-quest h2 { font-size:20px; }.pet-prep-heading { flex-direction:column; align-items:flex-start; gap:12px; }.pet-prep-heading label { width:100%; justify-content:space-between; }.pet-prep-heading select { max-width:200px; }.pet-recipe { gap:6px; padding:12px 6px; }.pet-recipe>div { width:80px; min-width:0; }.pet-recipe .pet-food-art { width:52px; height:52px; }.pet-recipe b { font-size:10px; line-height:1.4; min-height:28px; }.pet-recipe small { font-size:8px; line-height:1.5; }.pet-recipe>svg { width:12px; }.pet-board { padding:7px; gap:6px; }.pet-board>button { aspect-ratio:.8; }.pet-board .pet-food-art { height:54px; }.pet-board small { font-size:8px; }.pet-delivery { flex-direction:column; align-items:stretch; gap:11px; }.pet-delivery>span { font-size:10px; }.pet-toolbar .visitor-primary { font-size:11px!important; padding:10px; }.met-animals { gap:5px; }.met-animals .animal-art { height:60px; }.met-animals b { font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .animal-button { transition:none; } }

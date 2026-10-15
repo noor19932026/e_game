@@ -1,0 +1,852 @@
+.picnic-journey button {
+  cursor:pointer;
+  font-family:inherit;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.picnic-journey button:disabled {
+  cursor:default;
+}
+.picnic-journey button:focus-visible,.picnic-journey select:focus-visible {
+  outline:3px solid #b27836;
+  outline-offset:3px;
+}
+.picnic-journey p,.picnic-journey h2,.picnic-journey h3 {
+  margin:0;
+}
+.picnic-journey .eyebrow {
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:#817564;
+}
+.picnic-journey .soft-button {
+  border:1px solid #dbddcf;
+  background:#eef0e5;
+  color:#496653;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:6px;
+  font-size:11px;
+}
+.picnic-journey .soft-button:hover {
+  background:#e1e7d5;
+}
+.picnic-journey .icon-button {
+  border:0;
+  background:transparent;
+  color:inherit;
+  width:34px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+}
+.shop-balance {
+  margin-top:18px;
+  color:#a47d36;
+  font:26px Georgia,serif;
+}
+.shop-balance small {
+  font:11px 'Microsoft YaHei',sans-serif;
+  margin-left:6px;
+}
+.picnic-journey {
+  margin:0 0 32px;
+  border:1px solid #d9d7bf;
+  border-radius:20px;
+  background:#fffcf4;
+  overflow:hidden;
+  color:#463c30
+}
+.journey-heading {
+  padding:25px 28px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  background:#eef0df
+}
+.journey-heading h2 {
+  font:600 27px/1.5 Georgia,'Microsoft YaHei',serif;
+  margin:8px 0
+}
+.journey-heading p {
+  font-size:12px;
+  color:#7d7762;
+  line-height:1.8
+}
+.chapter-stamp {
+  flex-shrink:0;
+  border:1px solid #a7af8b;
+  border-radius:50%;
+  width:88px;
+  height:88px;
+  display:grid;
+  place-items:center;
+  transform:rotate(9deg);
+  font-size:13px;
+  color:#55704d;
+  background:#f5f4e5
+}
+.journey-progress {
+  display:flex;
+  border-bottom:1px solid #e5e0d1;
+  padding:14px 28px;
+  gap:22px;
+  flex-wrap:wrap
+}
+.journey-progress>span {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  font-size:11px;
+  color:#969080
+}
+.journey-progress b {
+  display:grid;
+  place-items:center;
+  width:19px;
+  height:19px;
+  border:1px solid #d9d7c6;
+  border-radius:50%;
+  font:11px Georgia,serif
+}
+.journey-progress .done,.journey-progress .current {
+  color:#496653
+}
+.journey-progress .current b {
+  background:#496653;
+  color:#fff
+}
+.journey-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 310px;
+  gap:30px;
+  padding:24px 28px
+}
+.journey-work {
+  min-width:0
+}
+.journey-tabs {
+  display:flex;
+  gap:7px;
+  padding-bottom:15px;
+  border-bottom:1px solid #e7e2d5
+}
+.journey-tabs button {
+  border:0;
+  padding:9px 13px;
+  color:#837966;
+  background:transparent;
+  border-radius:6px;
+  font-size:12px
+}
+.journey-tabs button[aria-pressed=true] {
+  background:#e8edde;
+  color:#496653;
+  font-weight:bold
+}
+.journey-tabs span {
+  background:#c97d62;
+  color:white;
+  border-radius:10px;
+  padding:0 5px;
+  margin-left:4px
+}
+.order-settings {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin:18px 0;
+  color:#77725e;
+  font-size:11px
+}
+.order-settings label {
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+.order-settings select {
+  max-width:210px;
+  border:1px solid #dcd8c5;
+  border-radius:5px;
+  padding:7px;
+  background:#fffdf5;
+  font:inherit;
+  color:#496653
+}
+.mission-brief {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px;
+  background:#f8edda;
+  border:1px solid #e6d9bf;
+  border-radius:10px
+}
+.mia-avatar {
+  width:38px;
+  height:38px;
+  flex-shrink:0;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#dba78b;
+  color:#fff;
+  font:20px Georgia,serif
+}
+.mission-brief>div {
+  flex:1
+}
+.mission-brief b {
+  font-size:13px
+}
+.mission-brief p {
+  font-size:11px;
+  line-height:1.8;
+  color:#88755f;
+  margin-top:5px
+}
+.primary-button {
+  border:0;
+  border-radius:6px;
+  background:#496653;
+  color:#fff;
+  padding:11px 14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:12px;
+  white-space:nowrap
+}
+.primary-button:disabled {
+  opacity:.45;
+  cursor:default
+}
+.prep-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:20px 0 12px;
+  gap:8px;
+  font-size:11px
+}
+.prep-heading small {
+  color:#8d8575;
+  font-size:10px
+}
+.picnic-supplies {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px
+}
+.picnic-supplies>div {
+  min-width:0;
+  text-align:center
+}
+.picnic-supplies>div>button:first-child {
+  position:relative;
+  width:100%;
+  padding:7px 5px 10px;
+  display:flex;
+  align-items:center;
+  flex-direction:column;
+  background:#faf6e9;
+  border:1px solid #e7ddc6;
+  border-radius:9px;
+  color:#5a4935
+}
+.picnic-supplies .picnic-art {
+  height:65px
+}
+.picnic-supplies b {
+  font:700 14px Georgia,serif
+}
+.picnic-supplies small {
+  font-size:10px;
+  margin-top:5px;
+  color:#958169
+}
+.picnic-supplies>div>button:first-child>svg:last-child {
+  position:absolute;
+  right:6px;
+  top:6px;
+  color:#7d956f
+}
+.text-button {
+  border:0;
+  background:transparent;
+  color:#6a7e5e;
+  font-size:10px;
+  padding:7px 2px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  text-decoration:underline;
+  text-underline-offset:3px
+}
+.text-button:disabled {
+  opacity:.4
+}
+.prep-board {
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:9px;
+  background:#eae8d9;
+  padding:10px;
+  border-radius:10px
+}
+.prep-board button {
+  aspect-ratio:1;
+  min-width:0;
+  background:#faf7ed;
+  border:2px solid transparent;
+  border-radius:8px;
+  color:#d2c9b4;
+  font-size:21px
+}
+.prep-board .selected {
+  border-color:#6c855d;
+  background:#e1ebd2;
+  transform:translateY(-3px)
+}
+.packed-foods {
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  padding:12px 0;
+  font-size:11px;
+  color:#8a7c66
+}
+.packed-foods b {
+  color:#496653
+}
+.journey-notice {
+  font-size:11px;
+  line-height:1.8;
+  padding-top:14px;
+  color:#8b775e;
+  border-top:1px dashed #ded8c5;
+  margin-top:15px!important;
+  min-height:45px
+}
+.picnic-postcard {
+  height:300px;
+  position:relative;
+  background:#ebeedb;
+  border:7px solid #fff9e9;
+  box-shadow:0 2px 0 #ddd6c3;
+  transform:rotate(2deg);
+  overflow:hidden
+}
+.postcard-label {
+  position:absolute;
+  top:14px;
+  left:14px;
+  font:10px Georgia,serif;
+  letter-spacing:2px;
+  color:#6b7755
+}
+.picnic-sun {
+  position:absolute;
+  top:40px;
+  right:37px;
+  width:51px;
+  height:51px;
+  border-radius:50%;
+  background:#edcc7f
+}
+.picnic-tree {
+  position:absolute;
+  left:-18px;
+  top:43px;
+  width:125px;
+  height:156px
+}
+.picnic-blanket {
+  position:absolute;
+  left:58px;
+  right:12px;
+  top:145px;
+  height:100px;
+  transform:skewX(-12deg);
+  border-radius:8px;
+  background:repeating-linear-gradient(0deg,#ffffff00 0px 19px,#f4e2c789 19px 38px),repeating-linear-gradient(90deg,#e7c5ad 0px 20px,#f9ecd8 20px 40px);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  padding:12px 2px
+}
+.picnic-place {
+  position:relative;
+  height:64px;
+  display:grid;
+  place-items:center;
+  color:#ac977e
+}
+.picnic-place small {
+  position:absolute;
+  bottom:0;
+  right:3px;
+  font-size:9px
+}
+.picnic-place .picnic-art {
+  width:51px;
+  transform:skewX(12deg)
+}
+.picnic-bag {
+  position:absolute;
+  top:184px;
+  left:17px;
+  color:#a08862
+}
+.picnic-bag.filled {
+  color:#796747
+}
+.picnic-bag .picnic-art {
+  width:40px;
+  height:40px;
+  position:absolute;
+  left:3px;
+  top:-14px
+}
+.picnic-postcard>p {
+  position:absolute;
+  bottom:10px;
+  left:0;
+  right:0;
+  text-align:center;
+  font:italic 12px Georgia,serif;
+  color:#7d8060
+}
+.memory-summary {
+  margin-top:26px;
+  padding:19px 15px;
+  background:#f7f3e7;
+  border-radius:10px
+}
+.memory-summary h3 {
+  font-size:14px;
+  margin:8px 0 18px
+}
+.memory-summary>div {
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+.memory-summary>div>span {
+  font-size:9px;
+  color:#8a7d67
+}
+.memory-summary b {
+  font:27px Georgia,serif;
+  display:block;
+  margin-bottom:6px;
+  color:#55704d
+}
+.memory-summary p {
+  font-size:10px;
+  line-height:1.9;
+  color:#91836d;
+  margin:17px 0 9px
+}
+.memory-summary>small {
+  font-size:10px;
+  color:#7d8060
+}
+.picnic-question {
+  border:1px solid #d9dfc4;
+  border-radius:10px;
+  background:#f7f9ed;
+  padding:19px
+}
+.question-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11px;
+  color:#83916e
+}
+.picnic-sentence {
+  font:22px/1.6 Georgia,'Microsoft YaHei',serif;
+  margin:14px 0!important;
+  color:#496653
+}
+.question-aids {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap
+}
+.picnic-help {
+  font-size:12px;
+  line-height:1.8;
+  background:#f5e7ca;
+  border-radius:5px;
+  padding:9px 11px;
+  margin:10px 0!important;
+  color:#89704d
+}
+.food-choices {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:20px 0
+}
+.food-choices button {
+  border:2px solid #e5e0cd;
+  border-radius:9px;
+  background:#fffdf4;
+  height:90px;
+  padding:5px
+}
+.food-choices button[aria-pressed=true] {
+  border-color:#6b855d;
+  background:#e6edda
+}
+.quantity-picker,.destination-picker {
+  border:0;
+  display:flex;
+  gap:10px;
+  padding:0;
+  margin:12px 0 20px
+}
+.quantity-picker legend,.destination-picker legend {
+  font-size:11px;
+  margin-bottom:10px;
+  color:#8a7d64
+}
+.quantity-picker button,.destination-picker button {
+  border:1px solid #d8d6c0;
+  background:#fffdf6;
+  border-radius:6px;
+  padding:9px 18px;
+  color:#6b7355;
+  font-size:14px
+}
+.quantity-picker button[aria-pressed=true],.destination-picker button[aria-pressed=true] {
+  background:#496653;
+  color:white;
+  border-color:#496653
+}
+.destination-picker button {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  font-size:12px
+}
+.destination-picker button>span {
+  font-size:24px
+}
+.learning-note {
+  font-size:10px;
+  line-height:1.8;
+  display:block;
+  color:#8f856e;
+  margin-top:13px
+}
+.chapter-finished,.review-desk {
+  padding:24px 16px;
+  background:#f3f2e4;
+  border-radius:9px
+}
+.chapter-finished>span,.review-symbol {
+  font:40px Georgia,serif;
+  color:#bf9854
+}
+.chapter-finished h3,.review-desk h3 {
+  font-size:18px;
+  margin:10px 0
+}
+.chapter-finished p,.review-desk p,.decoration-shop>p {
+  font-size:12px;
+  line-height:1.9;
+  color:#8a7c64;
+  margin:12px 0 16px
+}
+.review-desk small {
+  font-size:11px;
+  color:#6c805c
+}
+.decoration-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px
+}
+.decoration-grid article {
+  border:1px solid #e1dbc6;
+  border-radius:9px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px
+}
+.decor-swatch {
+  width:100%;
+  height:58px;
+  display:grid;
+  place-items:center;
+  color:#fff8dc;
+  border-radius:5px;
+  font:18px Georgia,serif
+}
+.decoration-grid article>b {
+  font-size:12px
+}
+.decoration-grid small {
+  font-size:11px;
+  color:#9a805a
+}
+.decoration-grid button {
+  width:100%
+}
+.decoration-grid button:disabled {
+  opacity:.55
+}
+@media(max-width:950px) {
+  .journey-layout {
+    grid-template-columns:minmax(0,1fr) 240px;
+    gap:18px;
+    padding:20px
+  }
+  .journey-heading {
+    padding:20px
+  }
+  .journey-progress {
+    padding:14px 20px;
+    gap:12px
+  }
+  .mission-brief {
+    flex-wrap:wrap
+  }
+  .mission-brief .primary-button {
+    margin-left:50px
+  }
+  .picnic-blanket {
+    left:40px
+  }
+  .picnic-bag {
+    left:4px
+  }
+}
+@media(max-width:700px) {
+  .journey-layout {
+    grid-template-columns:minmax(0,1fr);
+    padding:16px
+  }
+  .journey-heading {
+    padding:18px 16px
+  }
+  .journey-heading h2 {
+    font-size:21px
+  }
+  .chapter-stamp {
+    width:64px;
+    height:64px;
+    font-size:10px
+  }
+  .journey-progress {
+    gap:10px;
+    padding:13px 16px
+  }
+  .journey-progress>span {
+    font-size:9px
+  }
+  .journey-progress b {
+    width:16px;
+    height:16px
+  }
+  .picnic-scene-panel {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    align-items:start
+  }
+  .picnic-postcard {
+    height:230px;
+    border-width:5px
+  }
+  .picnic-tree {
+    width:80px;
+    left:-20px
+  }
+  .picnic-blanket {
+    left:24px;
+    top:113px;
+    right:0;
+    height:79px;
+    padding-top:7px
+  }
+  .picnic-place {
+    height:52px
+  }
+  .picnic-place .picnic-art {
+    width:36px
+  }
+  .picnic-bag {
+    top:160px
+  }
+  .postcard-label {
+    font-size:7px;
+    left:7px;
+    letter-spacing:1px
+  }
+  .picnic-postcard>p {
+    font-size:9px;
+    padding:0 5px
+  }
+  .memory-summary {
+    margin-top:0;
+    padding:13px 10px
+  }
+  .memory-summary .eyebrow {
+    font-size:7px;
+    letter-spacing:1px
+  }
+  .memory-summary h3 {
+    font-size:12px;
+    margin-bottom:12px
+  }
+  .memory-summary>div {
+    gap:5px;
+    flex-wrap:wrap
+  }
+  .memory-summary b {
+    font-size:22px
+  }
+  .memory-summary p {
+    margin:10px 0;
+    font-size:9px
+  }
+  .memory-summary>small {
+    font-size:9px
+  }
+  .order-settings {
+    align-items:start;
+    flex-direction:column
+  }
+  .order-settings select {
+    max-width:230px
+  }
+  .picnic-supplies {
+    gap:7px
+  }
+  .picnic-supplies .picnic-art {
+    height:50px
+  }
+  .picnic-supplies b {
+    font-size:12px
+  }
+  .prep-heading {
+    font-size:10px;
+    align-items:start
+  }
+  .prep-heading>button {
+    font-size:9px;
+    max-width:80px;
+    padding-top:0
+  }
+  .prep-board {
+    gap:5px;
+    padding:7px
+  }
+  .food-choices {
+    gap:6px
+  }
+  .food-choices button {
+    height:70px;
+    padding:2px
+  }
+  .question-aids {
+    gap:10px
+  }
+  .picnic-sentence {
+    font-size:20px
+  }
+  .picnic-question {
+    padding:14px
+  }
+  .journey-tabs {
+    gap:2px
+  }
+  .journey-tabs button {
+    padding:9px 10px;
+    font-size:11px
+  }
+}
+@media(max-width:360px) {
+  .picnic-scene-panel {
+    grid-template-columns:1fr
+  }
+  .picnic-postcard {
+    max-width:260px;
+    width:100%;
+    justify-self:center
+  }
+  .journey-heading h2 {
+    font-size:18px
+  }
+  .chapter-stamp {
+    width:50px;
+    height:50px;
+    font-size:9px
+  }
+  .journey-heading p {
+    font-size:10px
+  }
+  .journey-tabs button {
+    font-size:10px;
+    padding:8px
+  }
+  .picnic-sentence {
+    font-size:18px
+  }
+  .packed-foods {
+    gap:10px
+  }
+  .picnic-supplies b {
+    font-size:11px
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  * {
+    transition:none!important
+  }
+}
+
+/* The main app owns navigation; each view only shows its current activity. */
+.picnic-journey { margin-bottom:0; }
+.journey-heading { padding:20px 24px; background:#f1f1e4; }
+.journey-heading h2 { font-size:24px; margin:6px 0 0; }
+.chapter-stamp { width:auto; height:auto; border:1px solid #cbd3b8; border-radius:6px; padding:7px 10px; transform:none; font-size:11px; }
+.journey-progress { align-items:center; gap:10px; padding:12px 24px; }
+.journey-progress>small { font-size:11px; color:#897e68; margin-left:auto; }
+.journey-layout { grid-template-columns:minmax(0,1fr) 270px; gap:24px; padding:20px 24px; }
+.order-settings { margin:0 0 15px; }
+.mission-brief { padding:13px; }.mission-brief p { max-width:350px; }
+.prep-heading { margin-top:18px; }.picnic-supplies .picnic-art { height:56px; }.picnic-supplies small { margin-top:3px; }
+.picnic-postcard { height:270px; margin-top:0; }
+.memory-summary { margin-top:0; }
+.journey-notice { min-height:0; padding-top:11px; margin-top:8px!important; }
+.journey-shop .journey-notice { color:#496653; }
+.journey-shop .shop-balance { display:none; }
+.journey-shop .decoration-shop>p { margin-top:0; }
+.journey-review .review-desk { margin-top:0; }
+@media(max-width:700px) {
+  .journey-heading { padding:17px 15px; }.journey-heading h2 { font-size:21px; }.chapter-stamp { font-size:10px; padding:6px 8px; }
+  .journey-progress { padding:12px 15px; gap:7px; }.journey-progress>small { font-size:9px; max-width:155px; line-height:1.5; }
+  .journey-layout { grid-template-columns:1fr; gap:15px; padding:15px; }
+  .order-settings { flex-direction:row; align-items:center; gap:7px; }.order-settings>span { display:none; }.order-settings label { font-size:10px; }.order-settings select { font-size:10px; max-width:210px; padding:6px; }
+  .mission-brief { gap:9px; }.mission-brief .mia-avatar { width:30px; height:30px; font-size:17px; }.mission-brief b { font-size:12px; }.mission-brief p { font-size:10px; }.mission-brief .primary-button { width:100%; margin-left:0; padding:10px; }
+  .picnic-scene-panel { display:block; }.journey-story:not(.is-complete) .picnic-scene-panel { display:none; }.journey-story.is-complete .picnic-postcard { width:260px; max-width:100%; height:230px; margin:auto; }
+  .journey-shop .picnic-scene-panel { grid-row:1; }.journey-shop .journey-work { grid-row:2; }
+  .picnic-supplies .picnic-art { height:46px; }.picnic-supplies small { font-size:9px; }.picnic-supplies .text-button { font-size:9px; }
+  .prep-heading { margin:14px 0 10px; font-size:10px; }.prep-board button { border-radius:6px; }.packed-foods { gap:10px; font-size:10px; }
+  .chapter-finished { padding:19px 15px; }.chapter-finished>span { font-size:28px; }.chapter-finished h3 { font-size:17px; }
+}

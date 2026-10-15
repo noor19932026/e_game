@@ -13,13 +13,14 @@ function load(name) {
   const module = { exports: {} }
   cache.set(name, module.exports)
   new Function('require', 'module', 'exports', source)(id => {
-    if (id !== './catalog') throw new Error('Unexpected module: ' + id)
-    return load('catalog')
+    if (!['./catalog', './journey', './visitors'].includes(id)) throw new Error('Unexpected module: ' + id)
+    return load(id.slice(2))
   }, module, module.exports)
   return module.exports
 }
 const c = load('catalog')
 const g = load('game')
+const j = load('journey')
 
 test('the eight chains have coherent actions, unique IDs, playable order sentences, and 74 vocabulary targets', () => {
   assert.equal(c.themes.length, 8)
@@ -122,7 +123,7 @@ test('old saves retain boards, counters, word recall, and order position when up
   const old = { version: 1, board: Array(25).fill(null), discovered: ['coffee-0', 'garden-0', 'bakery-0', 'coffee-1'], recall: { 'coffee-1': 2 }, coins: 42, merges: 8, deliveries: 1, orderStep: { coffee: 1, garden: 0, bakery: 0 } }
   old.board[7] = 'coffee-1'
   const upgraded = g.parseSave(JSON.stringify(old))
-  assert.equal(upgraded.version, 2)
+  assert.equal(upgraded.version, 4)
   assert.deepEqual(upgraded.boards.cafe, old.board)
   assert.equal(upgraded.coins, 42)
   assert.equal(upgraded.merges, 8)
@@ -140,6 +141,202 @@ test('invalid saves and cross-street tiles are rejected without modifying game d
   for (const mutate of [s => s.coins = -1, s => s.boards.cafe.pop(), s => s.boards.cafe[0] = 'juice-0', s => s.district = 'unknown', s => s.actionRecall['unknown-0'] = 1, s => s.phraseRecall['coffee-20'] = 1]) {
     const state = g.newGame()
     mutate(state)
+    assert.equal(g.parseSave(JSON.stringify(state)), null)
+  }
+})
+
+test('v2 migration preserves all street data and adds a fresh journey without invented recall', () => {
+  const state = g.newGame()
+  g.mergeTiles(state, 6, 7)
+  state.recall['coffee-1'] = 4; state.coins = 81
+  const { journey, ...old } = state
+  old.version = 2
+  const upgraded = g.parseSave(JSON.stringify(old))
+  assert.deepEqual(upgraded, { ...old, version: 4, journey: j.newJourney(), visitors: load('visitors').newVisitors() })
+  assert.deepEqual(upgraded.journey.memory, {})
+})
+
+test('picnic packing preserves food identity, enforces quantities, and rewards each task once', () => {
+  const state = g.newGame(), now = 100000
+  for (const food of j.foods) {
+    assert.equal(j.collectFood(state.journey, food.id, now), true)
+    assert.equal(j.collectFood(state.journey, food.id, now), true)
+    assert.equal(j.packFood(state.journey, 0, 1), true)
+    assert.equal(state.journey.packed[food.id], 2)
+  }
+  assert.equal(j.packFood(state.journey, 0, 0), false)
+  assert.equal(j.packFood(state.journey, -1, 1), false)
+  assert.equal(j.finishPicnicTask(state, 'apple', 2, undefined, now), false)
+  assert.equal(j.finishPicnicTask(state, 'bread', 2, undefined, now), false)
+  for (const task of j.picnicTasks) {
+    if (state.journey.step === 4) {
+      assert.equal(j.finishPicnicTask(state, 'bread', 1, 'table', now), false)
+      assert.equal(state.journey.packed.bread, 1)
+    }
+    assert.equal(j.finishPicnicTask(state, task.food, task.quantity, 'bag', now), true)
+  }
+  assert.equal(state.coins, 80)
+  assert.equal(state.journey.packed.bread, 1)
+  assert.equal(state.journey.packed.apple, 0)
+  assert.equal(j.finishPicnicTask(state, 'bread', 1, 'bag', now), false)
+  assert.ok(g.parseSave(JSON.stringify(state)))
+})
+
+test('missing food never consumes coins, rewards, or chapter progress; full pantry can recover', () => {
+  const state = g.newGame()
+  assert.equal(j.finishPicnicTask(state, 'bread', 1), false)
+  assert.equal(state.coins, 0); assert.equal(state.journey.step, 0)
+  for (let i = 0; i < 6; i++) assert.ok(j.collectFood(state.journey, 'apple'))
+  assert.equal(j.collectFood(state.journey, 'bread'), false)
+  assert.ok(j.packFood(state.journey, 0, 1))
+  assert.ok(j.collectFood(state.journey, 'bread'))
+  assert.equal(j.packFood(state.journey, 0, 2), false)
+})
+
+test('review separates helped, independent and delayed recall; reload cannot erase a hint', () => {
+  let state = g.newGame()
+  const now = 100000
+  j.introduce(state.journey, 'apple', now)
+  assert.deepEqual(j.dueFoods(state.journey, now + j.DAY - 1), [])
+  assert.deepEqual(j.dueFoods(state.journey, now + j.DAY), ['apple'])
+  j.markHelp(state.journey, 'apple', now + j.DAY)
+  state = g.parseSave(JSON.stringify(state))
+  j.recordAnswer(state.journey, 'apple', now + j.DAY)
+  assert.equal(state.journey.memory.apple.helped, 1)
+  assert.equal(state.journey.memory.apple.independent, 0)
+  assert.equal(state.journey.memory.apple.retained, 0)
+  j.recordAnswer(state.journey, 'apple', now + j.DAY + 1)
+  assert.equal(state.journey.memory.apple.independent, 1)
+  assert.equal(state.journey.memory.apple.retained, 0)
+  j.recordAnswer(state.journey, 'apple', now + 2 * j.DAY + 1)
+  assert.equal(state.journey.memory.apple.retained, 1)
+  assert.equal(state.journey.memory.apple.due, now + 5 * j.DAY + 1)
+  j.studyFood(state.journey, 'apple', now + 5 * j.DAY)
+  assert.deepEqual(j.dueFoods(state.journey, now + 5 * j.DAY + 1), [])
+})
+
+test('decoration purchases honor chapter unlocks and balance; repeat equip is free', () => {
+  const state = g.newGame(); state.coins = 100
+  assert.equal(j.buyDecoration(state, 'peach'), false)
+  state.journey.step = 1
+  assert.equal(j.buyDecoration(state, 'bistro'), false)
+  assert.ok(j.buyDecoration(state, 'peach'))
+  assert.equal(state.coins, 76)
+  assert.equal(j.buyDecoration(state, 'peach'), false)
+  assert.ok(j.equipDecoration(state.journey, 'peach'))
+  assert.equal(j.equipDecoration(state.journey, 'bistro'), false)
+  state.journey.step = 5
+  assert.ok(j.buyDecoration(state, 'bistro'))
+  assert.equal(state.coins, 40)
+  assert.ok(g.parseSave(JSON.stringify(state)))
+})
+
+test('v4 malformed chapter, memory, pantry and decoration saves are rejected', () => {
+  for (const mutate of [s => s.journey.step = 6, s => s.journey.pantry[0] = 'coffee-0', s => s.journey.packed.apple = -1,
+    s => s.journey.owned = ['bistro'], s => s.journey.equipped.awning = 'peach',
+    s => s.journey.memory.apple = { helped: 0, independent: 0, retained: 1, lastSeen: 0, due: 0, pendingHelp: false }]) {
+    const state = g.newGame(); mutate(state)
+    assert.equal(g.parseSave(JSON.stringify(state)), null)
+  }
+})
+
+const pets = load('visitors')
+test('v3 saves retain chapter, purchases, memory and all boards when adding free visitors', () => {
+  const state = g.newGame()
+  state.journey.step = 5
+  state.coins = 88
+  j.buyDecoration(state, 'sage')
+  j.introduce(state.journey, 'apple', 100000)
+  const { visitors, ...old } = state; old.version = 3
+  const upgraded = g.parseSave(JSON.stringify(old))
+  assert.deepEqual(upgraded, { ...old, version: 4, visitors: pets.newVisitors() })
+  assert.equal(upgraded.journey.equipped.awning, 'sage')
+})
+
+test('each four-visit bag covers all animals; adjacent guests differ across reloads and bags', () => {
+  const state = g.newGame(), now = Date.now()
+  const seen = []
+  for (let i = 0; i < 20; i++) {
+    pets.arrive(state.visitors, now, () => .25)
+    seen.push(state.visitors.current.animal)
+    assert.ok(g.parseSave(JSON.stringify(state)))
+    if (i > 0) assert.notEqual(seen[i], seen[i - 1])
+    if (i % 4 === 3) assert.equal(new Set(seen.slice(i - 3, i + 1)).size, 4)
+  }
+})
+
+test('feeding checks requested species and level; wrong deliveries preserve inventory and rewards', () => {
+  const state = g.newGame()
+  pets.arrive(state.visitors, Date.now(), () => .99)
+  assert.equal(state.visitors.current.animal, 'cat')
+  assert.ok(pets.supplyPet(state.visitors, 'dog'))
+  assert.ok(pets.supplyPet(state.visitors, 'dog'))
+  assert.ok(pets.mergePet(state.visitors, 0, 1))
+  const before = JSON.stringify(state)
+  assert.equal(pets.feedVisitor(state, 1).ok, false)
+  assert.equal(pets.feedVisitor(state, -1).ok, false)
+  assert.equal(JSON.stringify(state), before)
+  state.visitors.board[1] = null
+  assert.ok(pets.supplyPet(state.visitors, 'cat'))
+  assert.equal(pets.feedVisitor(state, 0).ok, false)
+  assert.ok(pets.supplyPet(state.visitors, 'cat'))
+  assert.ok(pets.mergePet(state.visitors, 0, 1))
+  const result = pets.feedVisitor(state, 1)
+  assert.deepEqual(result, { ok: true, coins: 12, unlocked: true })
+  assert.equal(state.visitors.board[1], null)
+  assert.equal(state.visitors.points, 1)
+  assert.equal(pets.feedVisitor(state, 1).ok, false)
+})
+
+test('hidden water task unlocks care chain once, and all unlocked chains merge to their terminal', () => {
+  const state = g.newGame()
+  pets.arrive(state.visitors, Date.now(), () => .99)
+  assert.equal(pets.supplyPet(state.visitors, 'care'), false)
+  assert.equal(pets.greetVisitor(state.visitors), false)
+  assert.equal(pets.waterVisitor(state, 'water').ok, false)
+  state.visitors.board[0] = { route: 'cat', level: 1 }
+  pets.feedVisitor(state, 0)
+  assert.ok(pets.greetVisitor(state.visitors))
+  assert.equal(pets.waterVisitor(state, 'milk').ok, false)
+  assert.deepEqual(pets.waterVisitor(state, 'water'), { ok: true, coins: 8, unlocked: true })
+  assert.equal(pets.waterVisitor(state, 'water').ok, false)
+  for (const route of ['cat', 'care']) {
+    assert.ok(pets.supplyPet(state.visitors, route)); assert.ok(pets.supplyPet(state.visitors, route))
+    assert.ok(pets.mergePet(state.visitors, 0, 1))
+    assert.ok(pets.supplyPet(state.visitors, route)); assert.ok(pets.supplyPet(state.visitors, route))
+    assert.ok(pets.mergePet(state.visitors, 0, 2)); assert.ok(pets.mergePet(state.visitors, 1, 2))
+    assert.equal(state.visitors.board[2].level, 2)
+    assert.equal(pets.mergePet(state.visitors, 2, 2), false)
+    state.visitors.board[2] = null
+  }
+  assert.ok(g.parseSave(JSON.stringify(state)))
+})
+
+test('daily species rewards cannot be farmed by re-entry; a new local day resets eligibility', () => {
+  const state = g.newGame(), now = new Date(2026, 9, 15, 12).getTime()
+  for (let i = 0; i < 8; i++) {
+    pets.arrive(state.visitors, now, () => .25)
+    const visit = state.visitors.current
+    state.visitors.board[0] = { route: visit.animal, level: visit.wants }
+    assert.equal(pets.feedVisitor(state, 0, now).coins, i < 4 ? 12 : 0)
+    pets.greetVisitor(state.visitors)
+    assert.equal(pets.waterVisitor(state, 'water', now).coins, i < 4 ? 8 : 0)
+  }
+  assert.equal(state.coins, 80)
+  assert.equal(state.visitors.points, 16)
+  pets.arrive(state.visitors, now + j.DAY, () => .25)
+  assert.deepEqual(state.visitors.fedToday, [])
+  assert.deepEqual(state.visitors.helpedToday, [])
+  const visit = state.visitors.current
+  state.visitors.board[0] = { route: visit.animal, level: visit.wants }
+  assert.equal(pets.feedVisitor(state, 0, now + j.DAY).coins, 12)
+})
+
+test('visitor saves reject unknown animals, invalid tiles, duplicate ledgers and locked routes', () => {
+  for (const mutate of [s => s.visitors.met = ['dragon'], s => s.visitors.queue = ['cat', 'cat'], s => s.visitors.points = -1,
+    s => s.visitors.board[0] = { route: 'care', level: 0 }, s => s.visitors.board[0] = { route: 'cat', level: 2 },
+    s => s.visitors.current.secret = 'done', s => s.visitors.board[0] = { route: 'cat', level: 9 }]) {
+    const state = g.newGame(); pets.arrive(state.visitors); mutate(state)
     assert.equal(g.parseSave(JSON.stringify(state)), null)
   }
 })

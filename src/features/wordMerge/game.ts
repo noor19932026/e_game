@@ -1,10 +1,14 @@
 import { chainActions, districts, isTerminal, themeDistrict, themePhrases, themeWords, wordById, themes, type DistrictId, type ThemeId } from './catalog'
+import { newJourney, validJourney, type JourneyState } from './journey'
+import { newVisitors, validVisitors, type VisitorState } from './visitors'
 
 export const BOARD_SIZE = 25
 // Keep the original key so earlier demo saves can be migrated in place.
 export const SAVE_KEY = 'epartner-word-merge-v1'
 export interface GameState {
-  version: 2
+  version: 4
+  journey: JourneyState
+  visitors: VisitorState
   district: DistrictId
   boards: Record<DistrictId, (string | null)[]>
   discovered: string[]
@@ -22,7 +26,7 @@ export function newGame(): GameState {
     district.themes.forEach((theme, index) => { board[6 + index * 5] = `${theme}-0`; board[7 + index * 5] = `${theme}-0` })
     return [district.id, board]
   })) as GameState['boards']
-  return { version: 2, district: 'cafe', boards, discovered: themes.map(t => `${t.id}-0`),
+  return { version: 4, journey: newJourney(), visitors: newVisitors(), district: 'cafe', boards, discovered: themes.map(t => `${t.id}-0`),
     recall: {}, actionRecall: {}, phraseRecall: {}, coins: 0, merges: 0, deliveries: 0,
     orderStep: Object.fromEntries(themes.map(t => [t.id, 0])) as Record<ThemeId, number> }
 }
@@ -53,12 +57,14 @@ export function parseSave(raw: string): GameState | null {
     }
     const actionKeys = new Set(themes.flatMap(t => chainActions[t.id].map((_, i) => `${t.id}-${i}`)))
     const phraseKeys = new Set(themes.flatMap(t => themePhrases[t.id].map((_, i) => `${t.id}-${i}`)))
-    if (value.version !== 2 || !districts.some(d => d.id === value.district) || !value.boards
+    if (![2, 3, 4].includes(value.version) || !districts.some(d => d.id === value.district) || !value.boards
       || !districts.every(d => boardValid(value.boards[d.id], d.id)
         && value.boards[d.id].every((id: string | null) => id === null || value.discovered.includes(id)))
       || !themes.every(t => counter(value.orderStep[t.id]))
       || !recordValid(value.actionRecall, id => actionKeys.has(id)) || !recordValid(value.phraseRecall, id => phraseKeys.has(id))) return null
-    return { ...value, discovered: [...new Set<string>(value.discovered)] } as GameState
+    if (value.version >= 3 && !validJourney(value.journey) || value.version === 4 && !validVisitors(value.visitors)) return null
+    return { ...value, version: 4, journey: value.version === 2 ? newJourney() : value.journey,
+      visitors: value.version === 4 ? value.visitors : newVisitors(), discovered: [...new Set<string>(value.discovered)] } as GameState
   } catch { return null }
 }
 export function mergeResult(board: (string | null)[], from: number, to: number): string | null {

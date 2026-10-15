@@ -28,10 +28,12 @@ def run(url: str, output: Path):
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto(url)
         page.wait_for_load_state('networkidle')
+        page.get_by_role('navigation', name='主要功能').get_by_role('button', name='自由合成', exact=True).click()
         expect(page.locator('.board-slot')).to_have_count(25)
 
         def state():
             saved = page.evaluate('(key) => JSON.parse(localStorage.getItem(key))', SAVE_KEY)
+            saved.pop('visitors', None)  # A fresh visit on reload intentionally changes only the visitor state.
             return {**saved, 'board': saved['boards'][saved['district']]}
 
         def slot(index):
@@ -51,17 +53,12 @@ def run(url: str, output: Path):
             slot(to_index).click()
             solve()
 
-        # First unlock, wrong answer retry, no falsely credited independent recall.
+        # New vocabulary is a light introduction; merging never forces a quiz.
         slot(6).click()
         expect(slot(7)).to_have_class(re.compile('compatible'))
         slot(7).click()
-        modal = page.get_by_role('dialog')
-        expect(modal).to_be_visible()
-        wrong = modal.locator('.quiz-options button').filter(has_not_text='袋子').first
-        wrong.click()
-        expect(modal.locator('.quiz-feedback')).to_be_visible()
+        expect(page.get_by_role('dialog')).to_have_count(0)
         assert state()['board'][7] == 'coffee-1'
-        modal.get_by_role('button', name='袋子', exact=True).click()
         assert state()['recall'].get('coffee-1', 0) == 0
 
         # Mouse dragging must merge exactly once, not select another tile on synthetic click.
@@ -92,8 +89,8 @@ def run(url: str, output: Path):
         merge(*bags)
         before = state()
         page.get_by_role('button', name='交付 coffee maker 订单', exact=True).click()
-        expect(page.locator('.order-quiz-sentence')).to_contain_text('_____')
-        page.get_by_role('dialog').get_by_role('button', name='coffee maker', exact=True).click()
+        expect(page.locator('.order-quiz-sentence')).to_contain_text('Please bring the coffee maker')
+        page.get_by_role('dialog').get_by_role('button', name='选择 coffee maker', exact=True).click()
         after = state()
         assert after['deliveries'] == 1 and after['coins'] == before['coins'] + 20
         assert 'coffee-2' not in after['board'] and after['orderStep']['coffee'] == 1
@@ -140,6 +137,7 @@ def run(url: str, output: Path):
         slot(terminal).click()
         page.get_by_role('button', name='回收选中', exact=True).click()
         assert state()['board'][terminal] is None and len(state()['discovered']) == 35
+        page.get_by_role('navigation', name='主要功能').get_by_role('button', name='学习', exact=True).click()
         page.get_by_role('button', name=re.compile('单词图鉴')).click()
         expect(page.locator('.collection-row button:not(:disabled)')).to_have_count(5)
         page.locator('.collection-row button').filter(has_text='bag').click()
@@ -168,6 +166,7 @@ def run(url: str, output: Path):
         # Every action and phrase can be practiced through the public UI.
         phrase_answers = {'coffee': ['cup', 'make'], 'garden': ['plant', 'bouquet'], 'bakery': ['slice', 'bake'], 'juice': ['glass', 'squeeze'], 'clothes': ['cotton', 'sew'], 'paper': ['piece', 'draw'], 'pottery': ['clay', 'shape'], 'kitchen': ['peel', 'fry']}
         for theme_id in phrase_answers:
+            page.get_by_role('navigation', name='主要功能').get_by_role('button', name='学习', exact=True).click()
             page.get_by_role('button', name=re.compile('单词图鉴')).click()
             page.get_by_label('学习主题', exact=True).select_option(theme_id)
             expect(page.locator('.collection-row button:not(:disabled)')).to_have_count(5 if theme_id in ['coffee', 'garden', 'bakery'] else 4)
@@ -186,12 +185,13 @@ def run(url: str, output: Path):
         page.reload(); page.wait_for_load_state('networkidle')
         assert state() == learned
         cafe_board = state()['boards']['cafe']
+        page.get_by_role('navigation', name='主要功能').get_by_role('button', name='自由合成', exact=True).click()
         page.get_by_role('navigation', name='街区选择').get_by_role('button', name=re.compile('手作街角')).click()
         assert state()['boards']['cafe'] == cafe_board
         page.get_by_role('navigation', name='街区选择').get_by_role('button', name=re.compile('花园小店')).click()
 
         # Full board and recovery; invalid save falls back to a valid new game.
-        page.get_by_role('button', name='我的小店', exact=True).click()
+        page.get_by_role('button', name='自由合成', exact=True).click()
         for _ in range(state()['board'].count(None)):
             supply.click()
         full = state()
@@ -224,10 +224,10 @@ def run(url: str, output: Path):
         touch_context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
         touch_page = touch_context.new_page()
         touch_page.goto(url); touch_page.wait_for_load_state('networkidle')
+        touch_page.get_by_role('button', name='自由合成', exact=True).tap()
         touch_page.locator('[data-slot="6"]').tap()
         touch_page.locator('[data-slot="7"]').tap()
-        expect(touch_page.get_by_role('dialog')).to_be_visible()
-        touch_page.get_by_role('dialog').get_by_role('button', name='袋子', exact=True).tap()
+        expect(touch_page.get_by_role('dialog')).to_have_count(0)
         expect(touch_page.locator('[data-slot="7"]')).to_contain_text('bag')
         assert not errors, errors
         touch_context.close(); context.close(); browser.close()
@@ -242,3 +242,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     run(args.url, args.output)
+    from verify_picnic import run_picnic
+    run_picnic(args.url, args.output)
+    from verify_visitors import run_visitors
+    run_visitors(args.url, args.output)
