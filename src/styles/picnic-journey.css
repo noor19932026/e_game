@@ -850,3 +850,11 @@
   .prep-heading { margin:14px 0 10px; font-size:10px; }.prep-board button { border-radius:6px; }.packed-foods { gap:10px; font-size:10px; }
   .chapter-finished { padding:19px 15px; }.chapter-finished>span { font-size:28px; }.chapter-finished h3 { font-size:17px; }
 }
+
+.tap-instruction { font-size:11px; color:#8b7b60; margin:15px 0 10px!important; }
+.food-choices button { position:relative; overflow:visible; }
+.food-tap-count { position:absolute; right:5px; top:5px; background:#e6ecd8; color:#5d7650; border-radius:15px; min-width:22px; padding:2px 5px; font:11px Georgia,serif; }
+.picnic-tray { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; margin:0 0 14px; border:1px dashed #cbd4b5; border-radius:8px; color:#82906c; font-size:12px; }
+.picnic-tray b { color:#4e6b50; font-size:16px; margin-left:6px; }.chapter-next-actions { display:flex; flex-wrap:wrap; gap:12px; }
+.journey-story .picnic-question { background:#faf9ee; }.journey-story .picnic-scene-panel { display:block!important; }.journey-story .picnic-postcard { margin:0 auto; }
+@media(max-width:700px) { .journey-story .journey-layout { gap:12px; }.journey-story .picnic-postcard { height:125px; width:100%; max-width:none; border-width:4px; transform:none; }.journey-story .picnic-tree { height:100px; width:85px; top:17px; }.journey-story .picnic-sun { width:32px; height:32px; top:13px; right:26px; }.journey-story .picnic-blanket { top:38px; left:90px; right:48px; height:65px; }.journey-story .picnic-bag { top:70px; left:58px; }.journey-story .picnic-postcard>p { bottom:3px; font-size:9px; }.journey-story .postcard-label { top:7px; font-size:7px; }.journey-story .picnic-place { height:48px; }.journey-story .picnic-place .picnic-art { width:37px; }.food-tap-count { right:2px; top:2px; font-size:10px; } }

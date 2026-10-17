@@ -1,9 +1,11 @@
-export type ThemeId = 'coffee' | 'garden' | 'bakery' | 'juice' | 'clothes' | 'paper' | 'pottery' | 'kitchen'
+import { extraRows, extraActions, extraPhrases } from './expansion'
+
+export type ThemeId = 'coffee' | 'garden' | 'bakery' | 'juice' | 'clothes' | 'paper' | 'pottery' | 'kitchen' | 'fruit' | 'breakfast' | 'school'
 export type DistrictId = 'cafe' | 'workshop' | 'market'
 export const districts: { id: DistrictId; name: string; description: string; themes: ThemeId[] }[] = [
-  { id: 'cafe', name: '花园小店', description: '咖啡 · 花园 · 烘焙', themes: ['coffee', 'garden', 'bakery'] },
-  { id: 'workshop', name: '手作街角', description: '衣物 · 纸艺 · 陶艺', themes: ['clothes', 'paper', 'pottery'] },
-  { id: 'market', name: '阳光集市', description: '果汁 · 薯片厨房', themes: ['juice', 'kitchen'] },
+  { id: 'cafe', name: '花园小店', description: '咖啡 · 花园 · 烘焙 · 早餐', themes: ['coffee', 'garden', 'bakery', 'breakfast'] },
+  { id: 'workshop', name: '手作街角', description: '衣物 · 纸艺 · 陶艺', themes: ['clothes', 'paper', 'pottery', 'school'] },
+  { id: 'market', name: '阳光集市', description: '果汁 · 薯片厨房', themes: ['juice', 'kitchen', 'fruit'] },
 ]
 export function themeDistrict(id: ThemeId): DistrictId { return districts.find(d => d.themes.includes(id))!.id }
 export interface MergeWord {
@@ -26,9 +28,12 @@ export const themes = [
   { id: 'paper' as const, name: '纸艺工坊', english: 'Paper studio', color: '#b78385', note: '制作关联：纸 → 画作 → 卡片 → 贺卡。在纸上画画，把画纸折成卡片，再写上祝福。' },
   { id: 'pottery' as const, name: '陶艺工坊', english: 'Clay studio', color: '#b68565', note: '制作关联：黏土 → 黏土罐 → 干燥的罐坯 → 陶罐。成形、干燥和烧制是不同步骤，通常还涉及其他工序。' },
   { id: 'kitchen' as const, name: '薯片厨房', english: 'Crispy kitchen', color: '#b39b4d', note: '制作关联：土豆 → 去皮土豆 → 土豆薄片 → 薯片。这里只学习制作过程的英语，不是实际烹饪操作教程。' },
+  { id: 'fruit' as const, name: '水果小铺', english: 'Fresh fruit', color: '#b88062', note: '苹果切片、组合水果、分装打包。合并是游戏规则，学习食物、容器与动作的关联。' },
+  { id: 'breakfast' as const, name: '早安厨房', english: 'Breakfast club', color: '#c5a361', note: '从鸡蛋到早餐套餐。可以把面包和熟鸡蛋直接组合成三明治；游戏不是烹饪配方。' },
+  { id: 'school' as const, name: '上学时光', english: 'School day', color: '#7f9a98', note: '文具、收纳与教室的场景关联；不是物品真的变成房间。' },
 ]
 type WordRow = [string, string, string, string, string, string]
-const rows: Record<ThemeId, WordRow[]> = {
+const baseRows: Partial<Record<ThemeId, WordRow[]>> = {
   coffee: [
     ['coffee bean', '咖啡豆', '/ˈkɒfi biːn/', 'A coffee bean is a seed.', '一颗咖啡豆是一粒种子。', 'bean 是豆；coffee bean 指咖啡豆。多颗咖啡豆是 coffee beans。'],
     ['bag', '袋子', '/bæɡ/', 'The bag is full of coffee beans.', '袋子里装满了咖啡豆。', 'a bag of coffee beans = 一袋咖啡豆。bag 是容器，bean 是里面的东西。'],
@@ -81,6 +86,7 @@ const rows: Record<ThemeId, WordRow[]> = {
     ['crisps', '薯片', '/krɪsps/', 'These crisps are crunchy.', '这些薯片很脆。', '英式英语 crisps 指薄而脆的薯片；美式英语常称 potato chips。英式 chips 常指薯条。'],
   ],
 }
+const rows = Object.fromEntries(themes.map(t => [t.id, [...(baseRows[t.id] || []), ...(extraRows[t.id] || [])]])) as Record<ThemeId, WordRow[]>
 export const words: MergeWord[] = themes.flatMap(theme => rows[theme.id].map((row, level) => ({
   id: `${theme.id}-${level}`, theme: theme.id, level,
   word: row[0], meaning: row[1], phonetic: row[2], sentence: row[3], translation: row[4], relation: row[5],
@@ -99,7 +105,7 @@ export interface ChainAction {
 
 // Each entry describes the relationship from one item to the next, rather than
 // suggesting that ingredients literally turn into a container or a machine.
-export const chainActions: Record<ThemeId, ChainAction[]> = {
+const baseActions: Partial<Record<ThemeId, ChainAction[]>> = {
   coffee: [
     { verb: 'pack', meaning: '装袋', phonetic: '/pæk/', sentence: 'Pack the coffee beans in a bag.', translation: '把咖啡豆装进袋子里。', explanation: 'pack 表示包装、装好。咖啡豆被装进袋子，豆子没有变成袋子。' },
     { verb: 'load', meaning: '装入', phonetic: '/ləʊd/', sentence: 'Load the ground coffee into the coffee maker.', translation: '把磨好的咖啡粉装入咖啡机。', explanation: 'load 表示装入。先磨豆，再把咖啡粉装入咖啡机；袋子和机器是原料包装与工具的关联。' },
@@ -145,6 +151,8 @@ export const chainActions: Record<ThemeId, ChainAction[]> = {
   ],
 }
 
+export const chainActions = Object.fromEntries(themes.map(t => [t.id, [...(baseActions[t.id] || []), ...(extraActions[t.id] || [])]])) as Record<ThemeId, ChainAction[]>
+
 export interface PhraseEntry {
   phrase: string
   meaning: string
@@ -155,7 +163,7 @@ export interface PhraseEntry {
   translation: string
   explanation: string
 }
-export const themePhrases: Record<ThemeId, PhraseEntry[]> = {
+const basePhrases: Partial<Record<ThemeId, PhraseEntry[]>> = {
   coffee: [
     { phrase: 'a cup of coffee', meaning: '一杯咖啡', prompt: 'a _____ of coffee', answer: 'cup', options: ['cup', 'slice', 'bouquet'], sentence: 'I would like a cup of coffee.', translation: '我想要一杯咖啡。', explanation: 'coffee 通常不可数，用 a cup of 表示一杯。' },
     { phrase: 'make coffee', meaning: '煮咖啡', prompt: '_____ coffee', answer: 'make', options: ['make', 'sew', 'fold'], sentence: 'We make coffee in the morning.', translation: '我们在早上煮咖啡。', explanation: 'make coffee 是制作咖啡的常见搭配。' },
@@ -189,6 +197,15 @@ export const themePhrases: Record<ThemeId, PhraseEntry[]> = {
     { phrase: 'fry potato slices', meaning: '炸土豆薄片', prompt: '_____ potato slices', answer: 'fry', options: ['fry', 'plant', 'weave'], sentence: 'Fry potato slices to make crisps.', translation: '把土豆薄片炸成薯片。', explanation: 'slice 是一片，slices 是多片；fry 在这里表示油炸。' },
   ],
 }
+export const themePhrases = { ...basePhrases, ...extraPhrases } as Record<ThemeId, PhraseEntry[]>
+
+export const combinationRecipes = [
+  { id: 'coffee-breakfast', ingredients: ['coffee-3', 'bakery-2'], result: 'coffee-6', name: '咖啡早餐盘', explanation: '咖啡＋面包，一起装进托盘' },
+  { id: 'egg-sandwich', ingredients: ['bakery-2', 'breakfast-1'], result: 'breakfast-2', name: '鸡蛋三明治', explanation: '面包＋水煮蛋，组合成三明治' },
+  { id: 'mixed-fruit', ingredients: ['fruit-0', 'juice-0'], result: 'fruit-2', name: '缤纷水果碗', explanation: '苹果＋橙子，一起放进水果碗' },
+  { id: 'pencil-drawing', ingredients: ['school-0', 'paper-0'], result: 'paper-1', name: '铅笔画', explanation: '铅笔＋纸，画一幅小画' },
+] as const
+
 export const vocabularyStats = {
   objects: words.length,
   actionEntries: Object.values(chainActions).flat().length,

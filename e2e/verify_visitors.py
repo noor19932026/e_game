@@ -75,7 +75,7 @@ def run_visitors(url, output):
         expect(page.locator('.picnic-journey')).not_to_be_visible()
         expect(page.locator('.free-play')).not_to_be_visible()
         expect(cafe.locator('.pet-delivery button')).to_be_disabled()
-        assert state()['coins'] == 0 and state()['version'] == 4
+        assert state()['coins'] == 0 and state()['version'] == 9
         initial_animal = state()['visitors']['current']['animal']
         cafe.locator('.animal-preferences summary').click()
         expect(cafe.locator('.animal-preferences a')).to_have_attribute('href', f'https://www.rspca.org.uk/adviceandwelfare/pets/{"birds" if initial_animal == "bird" else initial_animal + "s"}/diet')

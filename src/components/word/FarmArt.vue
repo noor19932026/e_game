@@ -1,0 +1,29 @@
+<script setup lang="ts">
+withDefaults(defineProps<{kind:string;stage?:string}>(),{stage:'packet'})
+</script>
+<template>
+  <svg class="farm-art" viewBox="0 0 110 110" fill="none" aria-hidden="true">
+    <g stroke="#796544" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <g v-if="kind==='water'"><path d="M35 43H73L77 84Q52 93 28 82Z" fill="#9ab7b1"/><path d="M34 45Q10 28 16 58Q17 71 30 72M74 54L95 39L101 47L77 71" stroke="#7f9d93" stroke-width="8"/><path d="M36 41Q43 21 67 41" stroke="#829b8a" stroke-width="5"/><path d="M91 29L94 24M101 32L105 29M100 22L103 15" stroke="#9ab8c0"/></g>
+      <g v-else-if="kind==='sun'" stroke="#c6a75c"><circle cx="55" cy="54" r="23" fill="#e6c97d"/><path d="M55 15V7M55 101V93M16 54H8M102 54H94M28 27L22 21M88 86L82 80M83 27L89 21M21 87L27 81" stroke-width="5"/><path d="M47 50V54M64 50V54M48 65Q55 70 62 65" stroke="#a38d51"/></g>
+      <g v-else-if="kind==='basket'"><path d="M22 48H89L81 90Q53 99 30 90Z" fill="#d1ae79"/><path d="M32 48Q35 7 77 47" stroke="#9f8051" stroke-width="7"/><path d="M24 61H86M27 75H84M39 51L43 93M57 51V94M75 51L71 93" stroke="#b9935d"/><path d="M22 47H89V55H22Z" fill="#e5c48c"/></g>
+      <g v-else-if="stage==='empty'" stroke="#b99d74"><path d="M24 78H85M30 89H78M38 67H72"/></g>
+      <g v-else-if="stage==='seed'"><path d="M25 85H85" stroke="#b99a6e"/><ellipse cx="56" cy="73" rx="9" ry="5" fill="#a98a56" transform="rotate(-20 56 73)"/><path d="M47 89H66" stroke="#c6ab83"/></g>
+      <g v-else-if="stage==='watered'"><path d="M54 87V55" stroke="#82996a" stroke-width="4"/><path d="M54 67Q28 66 32 42Q55 44 54 67ZM54 57Q56 32 77 34Q77 55 54 57Z" fill="#9db681" stroke="#82996a"/><path d="M25 88H84" stroke="#b99a6e"/><path d="M88 35Q78 47 88 51Q98 47 88 35Z" fill="#a0bfcb" stroke="none"/></g>
+      <g v-else-if="stage==='harvested'"><path d="M26 87H85M39 78H70" stroke="#b99a6e"/><path d="M45 60L53 68L69 50" stroke="#9cae7c" stroke-width="5"/></g>
+      <g v-else>
+        <g v-if="stage==='packet'"><path d="M21 19H88L85 93H24Z" fill="#ece4c6"/><path d="M21 19H88V30H21Z" fill="#a6b691"/><path d="M25 83H84V94H25Z" fill="#d4c8a2"/></g>
+        <g :transform="stage==='packet'?'translate(17 20) scale(.68)':'translate(0 0)'">
+          <g v-if="kind==='carrot'"><path d="M40 46L72 51Q64 76 44 94Q37 70 40 46Z" fill="#d99757"/><path d="M48 58L61 61M44 72L51 74" stroke="#b77c42"/><path d="M52 49Q26 30 35 19Q50 25 52 49ZM53 49Q50 16 64 11Q74 27 53 49ZM54 48Q69 23 82 29Q81 45 54 48Z" fill="#9eb67e" stroke="#869f66"/></g>
+          <g v-else-if="kind==='tomato'"><path d="M53 93V29" stroke="#8da26f" stroke-width="4"/><path d="M53 37Q30 32 33 17Q53 14 53 37ZM55 44Q66 20 84 30Q79 48 55 44Z" fill="#a0b882" stroke="#879e6e"/><circle cx="54" cy="65" r="24" fill="#d99779"/><path d="M40 42L50 49L54 40L60 49L69 42" stroke="#7d9569" stroke-width="3"/><path d="M41 59L39 67" stroke="#efc0a4" stroke-width="3"/></g>
+          <g v-else-if="kind==='strawberry'"><path d="M31 42Q54 27 79 43Q84 64 57 94Q30 80 27 56Q25 47 31 42Z" fill="#d68f82"/><path d="M36 37L48 46L55 31L62 45L75 37L67 52L54 45L42 53Z" fill="#8fa974" stroke="#7f9466"/><path d="M54 35Q48 22 58 17" stroke="#809565" stroke-width="4"/><g fill="#f8d5a3" stroke="none"><ellipse cx="40" cy="60" rx="2" ry="3"/><ellipse cx="57" cy="59" rx="2" ry="3"/><ellipse cx="70" cy="58" rx="2" ry="3"/><ellipse cx="47" cy="75" rx="2" ry="3"/><ellipse cx="62" cy="75" rx="2" ry="3"/><ellipse cx="55" cy="87" rx="2" ry="3"/></g></g>
+          <g v-else-if="kind==='corn'"><path d="M43 75Q31 23 52 16Q78 15 68 76Z" fill="#e2c471"/><path d="M42 32H70M40 45H72M41 58H71M49 20L47 75M59 19L61 75" stroke="#c5a553"/><path d="M52 92Q21 76 23 44Q49 51 52 92ZM54 92Q84 77 86 44Q58 52 54 92Z" fill="#a1b681" stroke="#829b6b"/><path d="M52 92Q38 68 28 54M55 92Q68 67 81 53" stroke="#c1cf9c"/></g>
+          <g v-else-if="kind==='pumpkin'"><path d="M55 39Q49 23 60 16L68 22Q57 27 63 39" fill="#9caa78"/><path d="M55 42Q24 24 20 63Q16 95 53 96Q88 99 91 69Q91 35 68 39Z" fill="#d4a260"/><ellipse cx="55" cy="66" rx="18" ry="30" fill="#e1b47a"/><path d="M36 41Q24 68 37 93M75 43Q85 69 73 94" stroke="#bc8e50"/><path d="M51 37L53 46L62 42" stroke="#829265" stroke-width="4"/></g>
+          <g v-else-if="kind==='cucumber'"><path d="M37 82Q19 69 37 44L57 20Q68 8 79 18Q93 28 76 49L56 80Q47 94 37 82Z" fill="#93aa79"/><path d="M43 77L73 27" stroke="#b3c591" stroke-width="5"/><g fill="#6e8b61" stroke="none"><circle cx="43" cy="57" r="2"/><circle cx="54" cy="47" r="2"/><circle cx="64" cy="34" r="2"/><circle cx="55" cy="63" r="2"/><circle cx="66" cy="49" r="2"/></g><path d="M77 17L80 11" stroke="#7c9263" stroke-width="4"/></g>
+          <g v-else-if="kind==='pea'"><path d="M24 76Q26 28 81 26Q89 71 41 88Z" fill="#a6ba7e" stroke="#809764"/><path d="M25 77Q35 48 80 27" stroke="#d5dea9" stroke-width="5"/><circle cx="41" cy="71" r="10" fill="#c5d398"/><circle cx="57" cy="57" r="11" fill="#c5d398"/><circle cx="72" cy="42" r="10" fill="#c5d398"/><path d="M81 26Q88 15 96 23" stroke="#869f6d"/></g>
+          <g v-else><path d="M55 95V48M54 77Q32 55 26 70Q29 88 54 88M56 70Q80 48 84 65Q78 80 56 80" fill="#a2b57a" stroke="#819663" stroke-width="3"/><g fill="#e3c269" stroke="#c0a052"><ellipse cx="55" cy="26" rx="9" ry="17"/><ellipse cx="55" cy="59" rx="9" ry="17"/><ellipse cx="38" cy="42" rx="17" ry="9"/><ellipse cx="72" cy="42" rx="17" ry="9"/><ellipse cx="44" cy="31" rx="8" ry="15" transform="rotate(-45 44 31)"/><ellipse cx="67" cy="54" rx="8" ry="15" transform="rotate(-45 67 54)"/><ellipse cx="66" cy="30" rx="8" ry="15" transform="rotate(45 66 30)"/><ellipse cx="43" cy="54" rx="8" ry="15" transform="rotate(45 43 54)"/></g><circle cx="55" cy="42" r="14" fill="#a38a59"/><path d="M49 37L61 49M60 36L48 49" stroke="#b79c63"/></g>
+        </g>
+      </g>
+    </g>
+  </svg>
+</template>

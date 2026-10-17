@@ -4,11 +4,22 @@ import { ArrowRight, BookOpen, Coffee, HelpCircle, Leaf, Plus, RotateCcw, Sparkl
 import WordMergeArt from '@/components/word/WordMergeArt.vue'
 import PicnicJourney from '@/components/word/PicnicJourney.vue'
 import VisitorCafe from '@/components/word/VisitorCafe.vue'
+import StoreCounter from '@/components/word/StoreCounter.vue'
+import LifeTown from '@/components/word/LifeTown.vue'
+import LittleKitchen from '@/components/word/LittleKitchen.vue'
+import TidyRoom from '@/components/word/TidyRoom.vue'
+import TownDelivery from '@/components/word/TownDelivery.vue'
+import EnglishFishing from '@/components/word/EnglishFishing.vue'
+import PetCare from '@/components/word/PetCare.vue'
+import LittleFarm from '@/components/word/LittleFarm.vue'
+import TownAdventure from '@/components/word/TownAdventure.vue'
 import AnimalArt from '@/components/word/AnimalArt.vue'
 import { animals, arrive, localDay } from '@/features/wordMerge/visitors'
+import { shopGoals, shopLevel, nextLevelXp } from '@/features/wordMerge/progress'
+import { townPlaces, type TownPage } from '@/features/wordMerge/town'
 import { useDialogAccessibility } from '@/composables/useDialogAccessibility'
-import { chainActions, districts, isTerminal, meaningChoices, shuffledChoices, themePhrases, themes, themeWords, vocabularyStats, words, wordById, type ChainAction, type DistrictId, type MergeWord, type PhraseEntry, type ThemeId } from '@/features/wordMerge/catalog'
-import { currentBoard, deliver, mergeResult, mergeTiles, newGame, orderWord, parseSave, SAVE_KEY, supply, switchDistrict } from '@/features/wordMerge/game'
+import { chainActions, combinationRecipes, districts, isTerminal, meaningChoices, shuffledChoices, themePhrases, themes, themeWords, vocabularyStats, words, wordById, type ChainAction, type DistrictId, type MergeWord, type PhraseEntry, type ThemeId } from '@/features/wordMerge/catalog'
+import { BOARD_COLUMNS, BOARD_ROWS, currentBoard, claimShopGoal, goalProgress, deliver, mergeResult, mergeTiles, newGame, orderWord, parseSave, SAVE_KEY, supply, supplyWord, supplyLevel, switchDistrict } from '@/features/wordMerge/game'
 
 const storageNotice = ref('进度自动保存在当前浏览器')
 function loadGame() {
@@ -16,7 +27,7 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY)
     const saved = raw ? parseSave(raw) : null
     if (raw && !saved) storageNotice.value = '旧存档无法读取，已开启新的一局'
-    if (saved && JSON.parse(raw!).version < 4) storageNotice.value = '旧版进度已保留，小动物来访已就绪'
+    if (saved && JSON.parse(raw!).version < 5) storageNotice.value = '旧进度已保留，棋盘已扩展到 48 格'
     return saved || newGame()
   } catch { storageNotice.value = '浏览器未允许保存，离开后进度会丢失'; return newGame() }
 }
@@ -27,19 +38,30 @@ function checkNewDay() { if (document.visibilityState === 'visible' && game.valu
 document.addEventListener('visibilitychange', checkNewDay)
 const visitDayTimer = setInterval(checkNewDay, 60000)
 const journeyEpoch = ref(0)
-type PageId = 'today' | 'visitors' | 'merge' | 'review' | 'book' | 'practice' | 'shop'
+type PageId = 'today' | 'visitors' | 'merge' | 'review' | 'book' | 'practice' | 'shop' | 'town' | TownPage
+const pageIds:PageId[] = ['today', 'visitors', 'merge', 'review', 'book', 'practice', 'shop', 'town', ...townPlaces.map(p => p.id)]
 const initialPage = window.location.hash.slice(1) as PageId
-const page = ref<PageId>(['today', 'visitors', 'merge', 'review', 'book', 'practice', 'shop'].includes(initialPage) ? initialPage : 'today')
+const page = ref<PageId>(pageIds.includes(initialPage) ? initialPage : game.value.journey.step === 5 ? 'visitors' : 'today')
+const townPage = computed(() => page.value === 'town' || townPlaces.some(p => p.id === page.value))
+const activityDone = computed(() => Object.fromEntries(['delivery','fishing','care','farm','adventure'].map(id => { const s = game.value[id as 'delivery'|'fishing'|'care'|'farm'|'adventure']; return [id,s.independent+s.assisted] })))
 const learningPage = computed(() => ['review', 'book', 'practice'].includes(page.value))
 const showJourney = computed(() => ['today', 'review', 'shop'].includes(page.value))
 const journeyView = computed(() => page.value === 'shop' ? 'shop' : page.value === 'review' ? 'review' : 'story')
 function goPage(id: PageId) {
   page.value = id
+  if (id === 'merge') message.value = '免费领两份材料，合一合；有顾客需要的物品就能直接交付。'
   window.history.replaceState(null, '', '#' + id)
+  window.scrollTo({ top:0, left:0, behavior:'instant' })
   pointerCancel()
   if ('speechSynthesis' in window) window.speechSynthesis.cancel()
 }
-function navigateJourney(view: 'story' | 'review' | 'shop') { goPage(view === 'story' ? 'today' : view) }
+function syncPageHash() {
+  const id = window.location.hash.slice(1) as PageId
+  if (pageIds.includes(id) && id !== page.value) goPage(id)
+}
+function changeTownActivity(event:Event) { const id=(event.target as HTMLSelectElement).value; if (townPlaces.some(p => p.id === id)) goPage(id as TownPage) }
+window.addEventListener('hashchange',syncPageHash)
+function navigateJourney(view: 'story' | 'review' | 'shop' | 'merge') { goPage(view === 'story' ? 'today' : view) }
 
 const lessonTotal = ref(0)
 const lessonDone = ref(0)
@@ -50,6 +72,7 @@ const board = computed(() => currentBoard(game.value))
 const districtThemes = computed(() => themes.filter(t => districts.find(d => d.id === game.value.district)!.themes.includes(t.id)))
 const startingTheme = districts.find(d => d.id === game.value.district)!.themes[0]!
 const selected = ref<number | null>(null)
+const basicSupply = ref(false)
 const focusedWord = ref(`${startingTheme}-0`)
 const theme = ref<ThemeId>(startingTheme)
 const tab = ref<'play' | 'book' | 'practice'>('play')
@@ -76,23 +99,33 @@ const slots = computed(() => board.value.filter(id => id === null).length)
 const discovered = computed(() => words.filter(w => game.value.discovered.includes(w.id)))
 const recalled = computed(() => discovered.value.filter(w => (game.value.recall[w.id] || 0) > 0).length)
 const orders = computed(() => districtThemes.value.map(t => ({ theme: t, word: wordById[orderWord(game.value, t.id)]!, ready: board.value.includes(orderWord(game.value, t.id)) })))
+const mobileOrder = computed(() => orders.value.find(o => o.ready) || orders.value.find(o => o.theme.id === detail.value.theme) || orders.value[0]!)
 const chain = computed(() => themeWords(theme.value))
 const activeActionIndex = ref<number | null>(null)
 const activeAction = computed(() => activeActionIndex.value === null ? null : chainActions[theme.value][activeActionIndex.value])
 watch(theme, id => { activeActionIndex.value = null; if (wordById[focusedWord.value]!.theme !== id) focusedWord.value = `${id}-0` })
-const icons = { coffee: Coffee, garden: Leaf, bakery: Wheat, juice: GlassWater, clothes: Shirt, paper: Scissors, pottery: Palette, kitchen: CookingPot, ShoppingBag }
+const icons = { coffee: Coffee, garden: Leaf, bakery: Wheat, juice: GlassWater, clothes: Shirt, paper: Scissors, pottery: Palette, kitchen: CookingPot, fruit: Leaf, breakfast: CookingPot, school: BookOpen }
 const actionPracticed = computed(() => Object.values(game.value.actionRecall).filter(n => n > 0).length)
 const phrasePracticed = computed(() => Object.values(game.value.phraseRecall).filter(n => n > 0).length)
 const collectionWords = computed(() => themeWords(theme.value))
 const phrases = computed(() => themePhrases[theme.value])
-const canMerge = computed(() => {
-  const counts: Record<string, number> = {}
-  return board.value.some(id => id && !isTerminal(id) && (counts[id] = (counts[id] || 0) + 1) >= 2)
-})
+const canMerge = computed(() => board.value.some((_, i) => board.value.some((_, k) => k > i && mergeResult(board.value, i, k))))
+const goal = computed(() => shopGoals.find(g => !game.value.progress.claimed.includes(g.id)))
+const goalValue = computed(() => goal.value ? Math.min(goal.value.target, goalProgress(game.value, goal.value.kind)) : 0)
+const districtRecipes = computed(() => combinationRecipes.filter(r => wordById[r.result] && districtThemes.value.some(t => t.id === wordById[r.result]!.theme)))
+function claimGoal() { if (goal.value && claimShopGoal(game.value, goal.value.id)) message.value = '开店目标达成！奖励已经放进你的星币口袋。' }
+function deliverOrder(id: ThemeId) {
+  const word = wordById[orderWord(game.value, id)]!
+  if (!deliver(game.value, id)) return
+  selected.value = null
+  message.value = `送达 ${word.word}！+20 星币，+12 成长。${game.value.orderStep[id] % 3 === 0 && supplyLevel(game.value, id) > 0 ? '这一组补给升级了，现在可以直接领取中级材料！' : ''}`
+  if (sound.value) speak(`Thank you for the ${word.word}.`)
+}
 const compatible = (index: number) => selected.value !== null && !!mergeResult(board.value, selected.value, index)
 
 function enterDistrict(id: DistrictId) {
   switchDistrict(game.value, id); selected.value = null; lastMerged.value = null; pointerCancel()
+  basicSupply.value = false
   const first = districts.find(d => d.id === id)!.themes[0]!
   focusedWord.value = `${first}-0`; theme.value = first; tab.value = 'play'
   message.value = '欢迎来到' + districts.find(d => d.id === id)!.name + '！各街区的棋盘分别保存，图鉴与练习记录共用。'
@@ -201,12 +234,13 @@ function actOnSlot(index: number) {
   const result = mergeResult(board.value, from, index)
   if (result) {
     const isNew = !game.value.discovered.includes(result)
+    const combination = source !== target
     mergeTiles(game.value, from, index)
     selected.value = null; focusedWord.value = result; theme.value = wordById[result]!.theme
     lastMerged.value = index
     if (animationTimer) clearTimeout(animationTimer)
     animationTimer = setTimeout(() => { lastMerged.value = null }, 600)
-    message.value = `合成成功：${wordById[result]!.word} · ${wordById[result]!.meaning}，+2 星币。`
+    message.value = `${combination ? '组合成功' : '合成成功'}：${wordById[result]!.word} · ${wordById[result]!.meaning}，+${combination ? 5 : 2} 星币${isNew ? '，发现新物品！' : '。'}`
     if (isNew) message.value += ' 新朋友已收入图鉴，点小喇叭认识它；合成可以继续。'
     if (sound.value) speak(wordById[result]!.word)
   } else {
@@ -215,10 +249,12 @@ function actOnSlot(index: number) {
   }
 }
 function addItem(id: ThemeId) {
-  const index = supply(game.value, id)
-  if (index < 0) { message.value = canMerge.value ? '棋盘满了，先合并一对相同物品，或交付订单。' : '棋盘满了，可以交付订单或回收选中的物品腾出位置。'; return }
-  focusedWord.value = `${id}-0`; theme.value = id
-  message.value = `补给到啦：${wordById[`${id}-0`]!.word}。补给免费，随时可以领。`
+  const first = supply(game.value, id, basicSupply.value)
+  if (first < 0) { message.value = canMerge.value ? '棋盘满了，先合并一对，或交付订单。' : '棋盘满了，可以交付订单或退回选中的物品。'; return }
+  const second = supply(game.value, id, basicSupply.value)
+  const supplied = supplyWord(game.value, id, basicSupply.value)
+  focusedWord.value = supplied; theme.value = id
+  message.value = `领取了 ${second < 0 ? 1 : 2} 份 ${wordById[supplied]!.word}，直接合一合吧。`
 }
 function recycle() {
   if (selected.value === null) return
@@ -248,6 +284,8 @@ const dragging = ref(false)
 let pointerStart: { index: number; x: number; y: number; id: number } | null = null
 let ignoreClick = false
 function pointerDown(event: PointerEvent, index: number) {
+  // Phones scroll through the board; two taps merge without a precision drag.
+  if (event.pointerType === 'touch') return
   if (event.button !== 0 || !board.value[index] || dialogOpen.value) return
   pointerStart = { index, x: event.clientX, y: event.clientY, id: event.pointerId }
   ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
@@ -272,22 +310,33 @@ function pointerUp(event: PointerEvent) {
 }
 function pointerCancel() { pointerStart = null; dragging.value = false }
 function clickSlot(index: number) { if (!ignoreClick) actOnSlot(index) }
-onBeforeUnmount(() => { clearInterval(visitDayTimer); document.removeEventListener('visibilitychange', checkNewDay); if (animationTimer) clearTimeout(animationTimer); if ('speechSynthesis' in window) window.speechSynthesis.cancel() })
+onBeforeUnmount(() => { clearInterval(visitDayTimer); document.removeEventListener('visibilitychange', checkNewDay); window.removeEventListener('hashchange',syncPageHash); if (animationTimer) clearTimeout(animationTimer); if ('speechSynthesis' in window) window.speechSynthesis.cancel() })
 </script>
 
 <template>
   <main class="word-cafe">
     <header class="cafe-header">
       <a class="cafe-brand" href="#today" @click.prevent="goPage('today')"><span class="brand-mark"><Coffee :size="22" /></span><span>Word & Co.<small>用英语，经营小小日常</small></span></a>
-      <div class="header-actions"><span class="header-wallet" aria-label="星币余额">✦ <b>{{ game.coins }}</b></span><button class="icon-button" aria-label="玩法说明" @click="help = true"><HelpCircle :size="21" /></button></div>
+      <div class="header-actions"><span class="shop-level-badge">Lv.{{ shopLevel(game.progress.xp) }}</span><span class="header-wallet" aria-label="星币余额">✦ <b>{{ game.coins }}</b></span><button class="icon-button" aria-label="玩法说明" @click="help = true"><HelpCircle :size="21" /></button></div>
     </header>
     <nav class="main-navigation" aria-label="主要功能">
       <button :aria-pressed="page === 'today' || page === 'visitors'" @click="goPage('today')"><Coffee :size="18" /><span>今日任务</span></button>
       <button :aria-pressed="page === 'merge'" @click="goPage('merge')"><Plus :size="18" /><span>自由合成</span></button>
+      <button :aria-pressed="townPage" @click="goPage('town')"><ShoppingBag :size="18" /><span>生活小镇</span></button>
       <button :aria-pressed="learningPage" @click="goPage('review')"><BookOpen :size="18" /><span>学习</span></button>
       <button :aria-pressed="page === 'shop'" @click="goPage('shop')"><ShoppingBag :size="18" /><span>我的小店</span></button>
     </nav>
     <section id="game" class="game-area">
+      <nav v-if="townPage && page !== 'town'" class="town-navigation" aria-label="小镇活动"><button @click="goPage('town')">小镇地图</button><div class="town-desktop-links"><button v-for="place in townPlaces" :key="place.id" :aria-pressed="page === place.id" @click="goPage(place.id)">{{ place.title }}</button></div><select class="town-activity-select" aria-label="切换小镇活动" :value="page" @change="changeTownActivity"><option v-for="place in townPlaces" :key="place.id" :value="place.id">{{ place.title }}</option></select></nav>
+      <LifeTown v-if="page === 'town'" :kitchen-done="game.kitchen.independent + game.kitchen.assisted" :room-done="Object.values(game.room.sessions).filter(s => s.rewarded).length" :activity-done="activityDone" :store-done="Object.values(game.stores.sessions).reduce((sum,s) => sum+s.independent+s.assisted,0)" @navigate="goPage" />
+      <LittleKitchen v-if="page === 'kitchen'" :game="game" />
+      <TidyRoom v-if="page === 'room'" :game="game" />
+      <TownDelivery v-if="page === 'delivery'" :game="game" />
+      <EnglishFishing v-if="page === 'fishing'" :game="game" />
+      <PetCare v-if="page === 'care'" :game="game" />
+      <LittleFarm v-if="page === 'farm'" :game="game" />
+      <TownAdventure v-if="page === 'adventure'" :game="game" />
+      <StoreCounter v-if="page === 'stores'" :game="game" />
       <nav v-if="page === 'today' || page === 'visitors'" class="today-navigation" aria-label="今日活动">
         <button :aria-pressed="page === 'today'" @click="goPage('today')">野餐故事 <span>{{ game.journey.step }} / 5</span></button>
         <button class="visitor-entry" :aria-pressed="page === 'visitors'" aria-label="动物来访" @click="goPage('visitors')"><AnimalArt :animal="visitingAnimal.id" :color="visitingAnimal.color" /><span>{{ visitingAnimal.name }} 来做客<small>免费招待小伙伴</small></span><b v-if="!game.visitors.current?.served">新</b></button>
@@ -300,16 +349,20 @@ onBeforeUnmount(() => { clearInterval(visitDayTimer); document.removeEventListen
       </nav>
       <PicnicJourney v-show="showJourney" :key="journeyEpoch" :game="game" :view="journeyView" :visible="showJourney" @navigate="navigateJourney" />
       <div v-show="['merge', 'book', 'practice'].includes(page)" class="free-play">
-      <div v-if="page === 'merge'" class="merge-topline"><h1>合一合，认识新单词</h1><span>{{ game.deliveries }} 笔订单完成</span></div>
+      <div v-if="page === 'merge'" class="merge-topline"><h1>把小店，一点点做大</h1><span>48 格工坊 · {{ words.length }} 个物品 · {{ game.deliveries }} 笔订单</span></div>
+      <section v-if="page === 'merge'" class="shop-growth" aria-label="小店成长目标"><div class="growth-level"><b>Lv.{{ shopLevel(game.progress.xp) }}</b><span>小店成长<small>{{ game.progress.xp }} / {{ nextLevelXp(game.progress.xp) }} XP</small></span></div><div class="growth-goal" v-if="goal"><b>{{ goal.title }}</b><span>{{ goal.description }} · {{ goalValue }} / {{ goal.target }}</span><progress :value="goalValue" :max="goal.target" /></div><div v-else class="growth-goal"><b>小店经营家</b><span>开店目标全部完成，继续收集和招待顾客吧。</span></div><button v-if="goal" class="soft-button" :disabled="goalValue < goal.target" @click="claimGoal">{{ goalValue >= goal.target ? '领取奖励' : '目标奖励' }} · {{ goal.reward }} ✦</button></section>
       <nav v-if="page === 'merge'" class="district-switch" aria-label="街区选择"><button v-for="district in districts" :key="district.id" :class="{ active: game.district === district.id }" :aria-pressed="game.district === district.id" @click="enterDistrict(district.id)"><b>{{ district.name }}</b></button></nav>
-      <div class="game-layout" :class="{ 'studio-layout': tab === 'practice' }">
+      <div class="game-layout" :class="{ 'studio-layout': tab === 'practice', 'merge-layout': page === 'merge' }">
         <section class="workbench">
-          <div v-if="tab === 'play'" class="board-heading"><div><span class="eyebrow">YOUR LITTLE WORKBENCH</span><h2>今天，也学一点点</h2></div><button class="soft-button" @click="hint"><Sparkles :size="15" /> 找一对</button></div>
+          <div v-if="tab === 'play'" class="board-heading"><div><span class="eyebrow">YOUR LITTLE WORKBENCH</span><h2>{{ selected === null ? '48 格小工坊，慢慢做大' : detail.word + ' · ' + detail.meaning }}</h2></div><button class="soft-button" @click="hint"><Sparkles :size="15" /> 找一对</button></div>
           <div v-else class="board-heading"><div><span class="eyebrow">{{ tab === 'book' ? 'YOUR WORD COLLECTION' : 'A LITTLE MORE EACH DAY' }}</span><h2>{{ tab === 'book' ? '每个单词，都有故事' : '认物、懂动作、会搭配' }}</h2></div><span class="book-count">{{ discovered.length }} / {{ words.length }} 已发现</span></div>
           <label v-if="tab !== 'play'" class="study-theme-picker">今天学哪一组？<select v-model="theme" aria-label="学习主题"><option v-for="group in themes" :key="group.id" :value="group.id">{{ group.name }} · {{ group.english }}</option></select></label>
-          <div v-if="tab === 'play'" class="board" :class="{ dragging }" aria-label="合并棋盘，5 行 5 列">
-            <button v-for="(id, index) in board" :key="index" :data-slot="index" class="board-slot" :class="{ occupied: id, selected: selected === index, compatible: compatible(index), pop: lastMerged === index, [id ? wordById[id]!.theme : 'empty']: true }" :aria-label="`第${Math.floor(index / 5) + 1}行第${index % 5 + 1}列，${id ? wordById[id]!.word + '，' + wordById[id]!.meaning : '空格'}`" :aria-pressed="selected === index" @click="clickSlot(index)" @pointerdown="pointerDown($event, index)" @pointermove="pointerMove" @pointerup="pointerUp" @pointercancel="pointerCancel">
-              <template v-if="id"><span class="tile-level">{{ wordById[id]!.level + 1 }}<span v-if="isTerminal(id)"> ✦</span></span><WordMergeArt :word="wordById[id]!" /><span class="tile-word">{{ wordById[id]!.word }}</span></template><span v-else class="empty-dot" />
+<div v-if="tab === 'play' && districtThemes.some(t => supplyLevel(game, t.id) > 0)" class="supply-mode"><span>补给可直接领取中级材料</span><button class="soft-button" :aria-pressed="basicSupply" @click="basicSupply = !basicSupply">{{ basicSupply ? '切换升级补给' : '领取基础材料' }}</button></div>
+          <div v-if="tab === 'play'" class="supplies compact-supplies"><button v-for="group in districtThemes" :key="group.id" :data-supply="group.id" class="supply-button" :style="{ '--theme-color': group.color }" @click="addItem(group.id)"><span class="supply-art"><WordMergeArt :word="wordById[supplyWord(game, group.id, basicSupply)]!" /></span><span><b>{{ wordById[supplyWord(game, group.id, basicSupply)]!.word }}</b><small>{{ basicSupply ? '基础材料' : supplyLevel(game, group.id) ? '补给已升级' : group.name }} · 免费领 2 份</small></span><Plus :size="16" /></button></div>
+          <p v-if="tab === 'play'" class="touch-board-help">点一个物品，再点同类合成 · 上下滑动查看棋盘</p>
+          <div v-if="tab === 'play'" class="board" :class="{ dragging }" :aria-label="`合并棋盘，${BOARD_ROWS} 行 ${BOARD_COLUMNS} 列`">
+            <button v-for="(id, index) in board" :key="index" :data-slot="index" class="board-slot" :class="{ occupied: id, selected: selected === index, compatible: compatible(index), pop: lastMerged === index, [id ? wordById[id]!.theme : 'empty']: true }" :aria-label="`第${Math.floor(index / BOARD_COLUMNS) + 1}行第${index % BOARD_COLUMNS + 1}列，${id ? wordById[id]!.word + '，' + wordById[id]!.meaning : '空格'}`" :aria-pressed="selected === index" @click="clickSlot(index)" @pointerdown="pointerDown($event, index)" @pointermove="pointerMove" @pointerup="pointerUp" @pointercancel="pointerCancel">
+              <template v-if="id"><span class="tile-level">{{ wordById[id]!.level + 1 }}<span v-if="isTerminal(id)"> ✦</span></span><WordMergeArt :word="wordById[id]!" /><span class="tile-word">{{ wordById[id]!.word }}</span><span v-if="lastMerged === index" class="merge-reward">+ {{ game.progress.combinations && message.startsWith('组合') ? 5 : 2 }} ✦</span></template><span v-else class="empty-dot" />
             </button>
           </div>
           <div v-else-if="tab === 'book'" class="collection">
@@ -324,18 +377,17 @@ onBeforeUnmount(() => { clearInterval(visitDayTimer); document.removeEventListen
           </div>
           <div v-if="tab === 'play'" class="board-tip" role="status" aria-live="polite"><span>✦</span><p>{{ message }}</p></div>
           <template v-if="tab === 'play'">
-            <div class="supply-heading"><span>原料补给 <small>免费 · 点击领取</small></span><span>{{ slots }} 个空位</span></div>
-            <div class="supplies"><button v-for="group in districtThemes" :key="group.id" class="supply-button" :style="{ '--theme-color': group.color }" @click="addItem(group.id)"><span class="supply-art"><WordMergeArt :word="wordById[`${group.id}-0`]!" /></span><span><b>{{ wordById[`${group.id}-0`]!.word }}</b><small>{{ group.name }}</small></span><Plus :size="18" /></button></div>
-            <div class="board-tools"><span>拖动合并，或先后点击两个相同物品</span><button :disabled="selected === null" @click="recycle"><Trash2 :size="14" /> 回收选中</button></div>
+            <div class="board-tools"><span>{{ slots }} 个空位 · 同类升级，也能尝试组合配方</span><button :disabled="selected === null" @click="recycle"><Trash2 :size="14" /> 回收选中</button></div>
           </template>
         </section>
 
         <aside v-if="tab !== 'practice'" class="learning-side">
-          <section v-if="tab === 'play'" class="orders-panel"><div class="panel-heading"><h2>小店订单</h2><span>答对句子 · +20 ✦</span></div><div v-for="(order, index) in orders" :key="order.theme.id" class="customer-order"><span class="customer-avatar" :class="order.theme.id">{{ ['M', 'L', 'O'][index] }}</span><div class="order-copy"><b>{{ ['Mia', 'Leo', 'Oliver'][index] }} 想要</b><span lang="en">{{ order.word.word }}</span></div><span class="order-art"><WordMergeArt :word="order.word" /></span><button :disabled="!order.ready" :aria-label="`交付 ${order.word.word} 订单`" @click="showChallenge(order.word, 'order', order.theme.id)">{{ order.ready ? '交付' : '待合成' }}<ArrowRight v-if="order.ready" :size="13" /></button></div><p>读懂一句英语，把物品送到需要它的人手中。</p></section>
+          <section v-if="tab === 'play'" class="orders-panel"><div class="panel-heading"><h2>小店订单</h2><span>直接送达 · +20 ✦</span></div><div v-for="(order, index) in orders" :key="order.theme.id" class="customer-order"><span class="customer-avatar" :class="order.theme.id">{{ ['M', 'L', 'O', 'N'][index] }}</span><div class="order-copy"><b>{{ ['Mia', 'Leo', 'Oliver', 'Nora'][index] }} 想要</b><span lang="en">{{ order.word.word }}</span></div><span class="order-art"><WordMergeArt :word="order.word" /></span><button :disabled="!order.ready" :aria-label="`交付 ${order.word.word} 订单`" @click="deliverOrder(order.theme.id)">{{ order.ready ? '交付' : '待合成' }}<ArrowRight v-if="order.ready" :size="13" /></button></div><p>合出需要的物品就能直接交付。每组完成 3／6 单后，补给会升级。</p></section><details v-if="tab === 'play'" class="recipe-book"><summary>发现不同材料的组合配方 · {{ districtRecipes.length }} 个</summary><article v-for="recipe in districtRecipes" :key="recipe.id"><div><WordMergeArt :word="wordById[recipe.ingredients[0]]!" /><span>+</span><WordMergeArt :word="wordById[recipe.ingredients[1]]!" /><span>→</span><WordMergeArt :word="wordById[recipe.result]!" /></div><b>{{ recipe.name }}</b><small>{{ recipe.explanation }}，直接拖到一起试试。</small></article></details>
           <section v-if="tab === 'book'" class="word-panel" :class="detail.theme"><div class="panel-heading"><span class="eyebrow">A WORD TO KEEP</span><button class="icon-button" :aria-label="`朗读单词 ${detail.word}`" @click="speak(detail.word)"><Volume2 :size="18" /></button></div><div class="word-showcase"><WordMergeArt :word="detail" /></div><div class="word-title"><h2 lang="en">{{ detail.word }}</h2><span>{{ detail.phonetic }}</span></div><p class="word-meaning">{{ detail.meaning }} <small>· {{ detail.level + 1 }} 级物品</small></p><div class="example"><button class="icon-button" aria-label="朗读例句" @click="speak(detail.sentence)"><Volume2 :size="16" /></button><p lang="en">{{ detail.sentence }}</p><small>{{ detail.translation }}</small></div><div class="connection"><span><Leaf :size="14" /> 这样连起来记</span><p>{{ detail.relation }}</p></div><button class="recall-button" @click="showChallenge(detail, 'review')"><BookOpen :size="15" /> 遮住释义，考考自己 <ArrowRight :size="15" /></button></section>
         </aside>
       </div>
 
+      <section v-if="page === 'merge'" class="quick-delivery" aria-label="当前顾客订单"><WordMergeArt :word="mobileOrder.word" /><div><small>{{ mobileOrder.ready ? '顾客的餐点准备好啦' : '当前小店订单' }}</small><b lang="en">{{ mobileOrder.word.word }}</b></div><button class="primary-button" :disabled="!mobileOrder.ready" :aria-label="`交付 ${mobileOrder.word.word} 订单`" @click="deliverOrder(mobileOrder.theme.id)">{{ mobileOrder.ready ? '交付 +20 ✦' : '等你合成' }}</button></section>
       <details v-if="page === 'book'" class="chain-disclosure"><summary>看看单词与动作如何关联</summary><section class="chain-panel">
         <div class="chain-heading">
           <div><span class="eyebrow">WORDS BELONG TOGETHER</span><h2>顺着一条线，记住一组词</h2><p class="chain-instruction">点一下中间的动作，听发音、看它们如何关联。</p></div>
@@ -384,8 +436,8 @@ onBeforeUnmount(() => { clearInterval(visitDayTimer); document.removeEventListen
         <div class="quiz-options" :class="{ 'image-options': challenge.kind === 'order' }"><button v-for="option in challenge.options" :key="option" :aria-label="challenge.kind === 'order' ? `选择 ${option}` : option" @click="answer(option)"><WordMergeArt v-if="challenge.kind === 'order'" :word="themeWords(challenge.word.theme).find(w => w.word === option)!" /><template v-else>{{ option }}</template></button></div>
         <p v-if="answerFeedback" class="quiz-feedback" role="status">{{ answerFeedback }}</p><small class="quiz-note">答错可以再试，物品不会丢失。只有首次作答正确才计为独立答对。</small>
       </template>
-      <template v-else-if="help"><span class="eyebrow">WELCOME TO WORD & CO.</span><h2 id="merge-dialog-title">你的小店，这样玩</h2><ol class="help-list"><li><b>领原料，合一合</b><span>点击下方补给。先点一个物品，再点相同物品；也可以直接拖过去。点空格可以移动。</span></li><li><b>见新词，想一想</b><span>第一次合出新物品，用轻提示介绍，不打断合成。点小喇叭听发音，读例句、看关联。</span></li><li><b>做订单，用一用</b><span>合出顾客需要的物品，点击交付，读懂新的请求并选择图片。订单交付后消耗一个物品，奖励 20 星币。</span></li><li><b>翻图鉴，再记一遍</b><span>查看已发现的单词，从单词卡发起回忆练习。棋盘满时，可以合并、交付或回收选中的物品。</span></li></ol><p class="quiz-note">本版有 {{ themes.length }} 条主题链、{{ vocabularyStats.unique }} 个不同单词和短语。三个街区分别保留棋盘。小店课堂可练习词义、动作和搭配。“今日任务”中还会有免费的小动物来访，合成专属餐点招待它，点它互动可发现隐藏委托。星币是游戏奖励；独立答对次数只是练习记录，不代表已经掌握。发音使用浏览器英语语音。</p><button class="primary-button" @click="closeDialog">开始我的小店 <ArrowRight :size="17" /></button></template>
-      <template v-else><span class="eyebrow">A FRESH LITTLE START</span><h2 id="merge-dialog-title">重新开一家小店？</h2><p>将清空本浏览器的野餐章节、装饰、复习计划、三个街区的棋盘、图鉴、星币和所有练习记录。</p><div class="reset-actions"><button class="soft-button" @click="closeDialog">继续这家店</button><button class="primary-button" @click="reset">确认重新开店</button></div></template>
+      <template v-else-if="help"><span class="eyebrow">WELCOME TO WORD & CO.</span><h2 id="merge-dialog-title">你的小店，这样玩</h2><ol class="help-list"><li><b>领原料，合一合</b><span>点击棋盘上方补给。先点一个物品，再点相同物品；也可以直接拖过去。点空格可以移动。</span></li><li><b>见新词，想一想</b><span>第一次合出新物品，用轻提示介绍，不打断合成。点小喇叭听发音，读例句、看关联。</span></li><li><b>做订单，用一用</b><span>合出顾客需要的物品，点击交付，直接把需要的物品送给顾客。订单交付后消耗一个物品，奖励 20 星币。</span></li><li><b>开店接客，配齐一套</b><span>在超市、水果市场、服装店的混排商品堆里，找出顾客要的商品。凑齐数量和搭配后一起交付；拿错可从购物篮放回，每轮接待三位顾客。</span></li><li><b>在生活小镇，用英语做事情</b><span>小小厨房制作餐点，小屋练习方位；还可以送货、钓鱼、照料宠物、种植采收，在场景里寻宝解谜。可以选择图文、阅读和听力，提示后完成会单独记录。</span></li><li><b>翻图鉴，再记一遍</b><span>查看已发现的单词，从单词卡发起回忆练习。棋盘满时，可以合并、交付或回收选中的物品。</span></li></ol><p class="quiz-note">本版有 {{ themes.length }} 条主题链、{{ vocabularyStats.unique }} 个不同单词和短语。三个街区分别保留棋盘。小店课堂可练习词义、动作和搭配。“今日任务”中还会有免费的小动物来访，合成专属餐点招待它，点它互动可发现隐藏委托。星币是游戏奖励；独立答对次数只是练习记录，不代表已经掌握。发音使用浏览器英语语音。</p><button class="primary-button" @click="closeDialog">开始我的小店 <ArrowRight :size="17" /></button></template>
+      <template v-else><span class="eyebrow">A FRESH LITTLE START</span><h2 id="merge-dialog-title">重新开一家小店？</h2><p>将清空本浏览器的野餐章节、装饰、复习计划、三个街区的棋盘、三家店的接客进度、全部小镇活动、菜谱与布置、图鉴、星币和所有练习记录。</p><div class="reset-actions"><button class="soft-button" @click="closeDialog">继续这家店</button><button class="primary-button" @click="reset">确认重新开店</button></div></template>
     </section></div></Teleport>
   </main>
 </template>

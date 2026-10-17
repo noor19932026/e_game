@@ -9,7 +9,7 @@
     "dev": "vite --host 127.0.0.1 --port 5010",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 5011",
-    "test": "node --test e2e/verify_word_merge_rules.cjs",
+    "test": "node --test e2e/content_rules.cjs e2e/verify_word_merge_rules.cjs e2e/kitchen_rules.cjs e2e/room_rules.cjs e2e/delivery_rules.cjs e2e/fishing_rules.cjs e2e/care_rules.cjs e2e/farm_rules.cjs e2e/adventure_rules.cjs",
     "test:browser": "python e2e/verify_word_merge.py"
   },
   "dependencies": { "vue": "3.5.32", "lucide-vue-next": "1.0.0" },

@@ -88,14 +88,14 @@ export function recordAnswer(j: JourneyState, id: FoodId, now = Date.now()) {
 export function dueFoods(j: JourneyState, now = Date.now()): FoodId[] {
   return foods.filter(f => j.memory[f.id] && j.memory[f.id]!.due <= now).map(f => f.id)
 }
-export function finishPicnicTask(state: { journey: JourneyState; coins: number }, food: FoodId, quantity: number, destination?: string, now = Date.now()): boolean {
+export function finishPicnicTask(state: { journey: JourneyState; coins: number; progress?: { xp: number } }, food: FoodId, quantity: number, destination?: string, now = Date.now()): boolean {
   const j = state.journey, task = picnicTasks[j.step]
   if (!task || food !== task.food || quantity !== task.quantity || (j.step === 4 && destination !== 'bag')) return false
-  // The last instruction moves the already-delivered bread; it does not consume it twice.
-  if (j.step < 4 && j.packed[food] < quantity) return false
-  if (j.step < 4) j.packed[food] -= quantity
+  // Story food is prepared directly by tapping its picture. Legacy pantry data is
+  // retained in saves, but never gates the story behind a second merge board.
   recordAnswer(j, food, now); j.step++; state.coins += 12
   if (j.step === picnicTasks.length) state.coins += 20
+  if (state.progress) state.progress.xp += 8 + (j.step === picnicTasks.length ? 20 : 0)
   return true
 }
 export function buyDecoration(state: { journey: JourneyState; coins: number }, id: DecorationId): boolean {

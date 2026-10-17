@@ -37,19 +37,25 @@ try:
             page.goto(origin + prefix)
             page.wait_for_load_state('networkidle')
             page.get_by_role('button', name='自由合成', exact=True).click()
-            expect(page.locator('.board-slot')).to_have_count(25)
-            page.locator('[data-slot="6"]').click()
+            expect(page.locator('.board-slot')).to_have_count(48)
             page.locator('[data-slot="7"]').click()
+            page.locator('[data-slot="8"]').click()
             expect(page.get_by_role('dialog')).to_have_count(0)
-            expect(page.locator('[data-slot="7"]')).to_contain_text('bag')
+            expect(page.locator('[data-slot="8"]')).to_contain_text('bag')
             page.reload(); page.wait_for_load_state('networkidle')
-            expect(page.locator('[data-slot="7"]')).to_contain_text('bag')
+            expect(page.locator('[data-slot="8"]')).to_contain_text('bag')
+            for destination in ['town', 'kitchen', 'room', 'delivery', 'fishing', 'care', 'farm', 'adventure']:
+                page.goto(origin + prefix + '#' + destination)
+                page.wait_for_load_state('networkidle')
+                assert page.evaluate('location.hash') == '#' + destination
+                assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), destination
+                expect(page.get_by_role('button',name='生活小镇',exact=True)).to_have_attribute('aria-pressed','true')
             assert not errors, errors
             assert all(urlsplit(url).netloc == urlsplit(origin).netloc for url in requests), requests
             assert not any('/api/' in url or 'runtime-config' in url for url in requests), requests
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
             context.close()
-            print(f'PASS: {prefix} loads, merges and persists with only its own static assets; no API or external resource requests')
+            print(f'PASS: {prefix} loads, merges, persists and opens all eight town activities with only its own static assets; no API or external resource requests')
         browser.close()
 finally:
     server.shutdown(); server.server_close()

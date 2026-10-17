@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import ExpandedWordArt from './ExpandedWordArt.vue'
 import type { MergeWord } from '@/features/wordMerge/catalog'
 defineProps<{ word: MergeWord }>()
+const originalLengths: Record<string, number> = { coffee: 5, garden: 5, bakery: 5, juice: 4, clothes: 4, paper: 4, pottery: 4, kitchen: 4 }
 </script>
 
 <template>
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="merge-art">
+  <ExpandedWordArt v-if="word.level >= (originalLengths[word.theme] || 0)" :word="word" />
+  <svg v-else viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="merge-art">
     <ellipse cx="50" cy="84" rx="29" ry="5" fill="#60472F" opacity=".1" />
     <g stroke="#624633" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
       <template v-if="word.theme === 'coffee'">
